@@ -127,6 +127,7 @@ def callback_upload(content, filename, filedate, _):
         Output("section-graph", "config"),
         Output("container-graphbar-options", "style"),
         Output("button-analyze", "disabled"),
+        Output('button-analyze', 'outline')
     ],
     Input("button-visualize", "n_clicks"),
     State("output-table", "derived_virtual_data"),
@@ -143,6 +144,7 @@ def callback_visualize(_, table_data, table_columns, graphbar_opt):
     static_plot_enabled = {"staticPlot": False}
     row_graphbar_visibile = {"visibility": "hidden"}
     button_analyze_disabled = False
+    button_analyze_outline = False
 
     if DATAFRAME.size > (366 * 8):
         fig = pyfigure.figure_scatter(DATAFRAME)
@@ -159,6 +161,7 @@ def callback_visualize(_, table_data, table_columns, graphbar_opt):
         static_plot_enabled,
         row_graphbar_visibile,
         button_analyze_disabled,
+        button_analyze_outline
     ]
 
 
