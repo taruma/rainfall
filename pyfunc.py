@@ -55,7 +55,10 @@ def generate_summary_single(dataframe, n_days="1MS"):
         return np.logical_or(vector.isna(), vector == 0).sum()
 
     def max_date(vector):
-        return vector.idxmax().strftime("%d %B %Y")
+        if vector.any():
+            return vector.idxmax().strftime("%d %B %Y")
+        else:
+            return "No Data"
 
     def n_max(vector):
         return vector.max()
