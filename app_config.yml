@@ -1,0 +1,17 @@
+DASH_APP:
+  APP_TITLE: Rainfall Data Explorer
+  UPDATE_TITLE: Updating...
+  DEBUG: True
+
+DASH_THEME:
+  THEME: SKETCHY
+
+TEMPLATE:
+  LOGO_SOURCE: https://raw.githubusercontent.com/hidrokit/static-assets/main/logo_0.4.0-v1.1/hidrokit-hidrokit/50x50square.png
+  WATERMARK_SOURCE: https://raw.githubusercontent.com/hidrokit/static-assets/main/logo_0.4.0-v1.1/hidrokit-hidrokit/400x100/400x100transparent.png
+  SHOW_LEGEND_INSIDE: False
+  SHOW_RANGESELECTOR: False
+
+VERSION: v0.1.0
+GITHUB_LINK: https://github.com/taruma/dash-hidrokit-rainfall
+GITHUB_REPO: taruma/dash-hidrokit-rainfall
