@@ -1,16 +1,14 @@
-from distutils.command.upload import upload
-from pathlib import Path
 import dash
 import dash_bootstrap_components as dbc
-from requests import delete
-from pytemplate import hktemplate
-import plotly.io as pio
-import pylayout
-import pyfunc
-from dash import dcc, html, Input, Output, State
-from pyconfig import appConfig
-import pyfigure
 import pandas as pd
+import plotly.io as pio
+import pyfigure
+import pyfunc
+import pylayout
+from dash import dcc, Input, Output, State
+from pathlib import Path
+from pyconfig import appConfig
+from pytemplate import hktemplate
 
 pio.templates.default = hktemplate
 
