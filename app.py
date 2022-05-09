@@ -2,10 +2,8 @@ import dash
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.io as pio
-import pyfigure
-import pyfunc
-import pylayout
-from dash import dcc, Input, Output, State
+import pyfigure, pyfunc, pylayout, pylayoutfunc
+from dash import dcc, html, Input, Output, State
 from pathlib import Path
 from pyconfig import appConfig
 from pytemplate import hktemplate
@@ -22,6 +20,9 @@ THEME = appConfig.DASH_THEME.THEME
 dbc_css = (
     "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.4/dbc.min.css"
 )
+
+# GLOBAL VARS
+SUMMARY_ALL = None
 
 # APP
 app = dash.Dash(
@@ -48,6 +49,7 @@ app.layout = dbc.Container(
         pylayout.HTML_ROW_GRAPH_ONE,
         pylayout.HTML_ROW_BUTTON_ANALYZE,
         pylayout.HTML_ROW_TABLE_ANALYZE,
+        pylayout._HTML_TROUBLESHOOT,
         pylayout.HTML_MADEBY,
         pylayout.HTML_FOOTER,
     ],
@@ -58,15 +60,15 @@ app.layout = dbc.Container(
 
 @app.callback(
     [
-        Output("output-data-upload", "children"),
-        Output("upload-data", "disabled"),
+        Output("row-table-uploaded", "children"),
+        Output("dcc-upload", "disabled"),
         Output("button-upload", "disabled"),
         Output("button-visualize", "disabled"),
         Output("button-visualize", "outline"),
     ],
-    Input("upload-data", "contents"),
-    State("upload-data", "filename"),
-    State("upload-data", "last_modified"),
+    Input("dcc-upload", "contents"),
+    State("dcc-upload", "filename"),
+    State("dcc-upload", "last_modified"),
     Input("button-skip", "n_clicks"),
     prevent_initial_call=True,
 )
@@ -89,7 +91,7 @@ def callback_upload(content, filename, filedate, _):
     button_viz_outline = True
 
     if dataframe is not None:
-        children = pylayout.create_table_layout(
+        children = pylayoutfunc.create_table_layout(
             dataframe,
             "output-table",
             filename=filename,
@@ -113,9 +115,9 @@ def callback_upload(content, filename, filedate, _):
 
 @app.callback(
     [
-        Output("section-graph", "figure"),
-        Output("visibility-download-button", "style"),
-        Output("section-graph", "config"),
+        Output("graph-rainfall", "figure"),
+        Output("row-button-download-csv", "style"),
+        Output("graph-rainfall", "config"),
         Output("container-graphbar-options", "style"),
         Output("button-analyze", "disabled"),
         Output("button-analyze", "outline"),
@@ -123,7 +125,7 @@ def callback_upload(content, filename, filedate, _):
     Input("button-visualize", "n_clicks"),
     State("output-table", "derived_virtual_data"),
     State("output-table", "columns"),
-    State("graph-bar-options", "value"),
+    State("radio-graphbar-options", "value"),
     prevent_initial_call=True,
 )
 def callback_visualize(_, table_data, table_columns, graphbar_opt):
@@ -167,24 +169,61 @@ def callback_download_table(_, table_data, table_columns):
 
 
 @app.callback(
-    Output("col-table-analyze", "children"),
+    Output("tab-analyze", "children"),
     Input("button-analyze", "n_clicks"),
     State("output-table", "derived_virtual_data"),
     State("output-table", "columns"),
     prevent_initial_call=True,
 )
 def callback_analyze(_, table_data, table_columns):
+    global SUMMARY_ALL
     dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
 
-    summary_all = pyfunc.generate_summary_all(dataframe, n_days=["16D", "MS", "YS"])
+    SUMMARY_ALL = pyfunc.generate_summary_all(dataframe, n_days=["16D", "MS", "YS"])
     tables = [
-        pylayout.create_table_summary(
+        pylayoutfunc.create_table_summary(
             summary, f"table-analyze-{counter}", deletable=False
         )
-        for counter, summary in enumerate(summary_all)
+        for counter, summary in enumerate(SUMMARY_ALL)
     ]
 
-    children = pylayout.create_tabcard_layout(tables)
+    children = pylayoutfunc.create_tabcard_table_layout(tables)
+
+    return [children, html.Div("HELLO")]
+
+
+@app.callback(
+    Output("row-troubleshoot", "children"),
+    Input("button-troubleshoot", "n_clicks"),
+    # State("table-analyze-0", "derived_virtual_data"),
+    # State("table-analyze-0", "columns"),
+    prevent_initial_call=True,
+)
+def callback_troubleshoot(_):
+    from itertools import product
+
+    label_periods = ["Biweekly", "Monthly", "Yearly"]
+    label_maxsum = ["Max + Sum"]
+    label_raindry = ["Dry + Rain"]
+    label_ufunc = label_maxsum + label_raindry
+
+    graphs_maxsum = [
+        pyfigure.figure_summary_maxsum(
+            summary, title=f"<b>{period}: {title}</b>", period=period
+        )
+        for summary, title, period in zip(SUMMARY_ALL, label_maxsum * 3, label_periods)
+    ]
+    graphs_raindry = [
+        pyfigure.figure_summary_raindry(
+            summary, title=f"<b>{period}: {title}</b>", period=period
+        )
+        for summary, title, period in zip(SUMMARY_ALL, label_raindry * 3, label_periods)
+    ]
+
+    all_graphs = graphs_maxsum + graphs_raindry
+    labels = [": ".join(i) for i in product(label_ufunc, label_periods)]
+
+    children = pylayoutfunc.create_tabcard_graph_layout(all_graphs, labels)
 
     return children
 
