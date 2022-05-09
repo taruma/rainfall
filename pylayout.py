@@ -261,7 +261,7 @@ HTML_ROW_OPTIONS_GRAPH_RAINFALL = html.Div(
                 [
                     dbc.Col(
                         [
-                            dbc.Label("Small Dataset Options:"),
+                            dbc.Label("Small Dataset (<= 2,920 data points) Options:"),
                             dbc.RadioItems(
                                 options=[
                                     {"label": "Stack", "value": "stack"},

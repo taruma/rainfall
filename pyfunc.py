@@ -58,7 +58,7 @@ def generate_summary_single(dataframe, n_days="1MS"):
         if vector.any():
             return vector.idxmax().strftime("%d %B %Y")
         else:
-            return "No Data"
+            return "No Data/Rainfall"
 
     def n_max(vector):
         return vector.max()
