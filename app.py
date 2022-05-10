@@ -83,7 +83,7 @@ def callback_upload(content, filename, filedate, _):
 
     if ctx.triggered[0]["prop_id"] == "button-skip.n_clicks":
         dataframe = pd.read_csv(
-            Path(r"./example_1Y7S.csv"), index_col=0, parse_dates=True
+            Path(r"./example_2Y4S_named.csv"), index_col=0, parse_dates=True
         )
         filename = None
         filedate = None
@@ -241,7 +241,10 @@ def callback_troubleshoot(_):
 
     graphs_maxsum = [
         pyfigure.figure_summary_maxsum(
-            summary, title=f"<b>{period}: {title}</b>", period=period
+            summary,
+            title=f"<b>{period}: {title}</b>",
+            period=period,
+            subplot_titles=["Max", "Sum"],
         )
         for summary, title, period in zip(SUMMARY_ALL, label_maxsum * 3, label_periods)
     ]
@@ -255,7 +258,7 @@ def callback_troubleshoot(_):
 
     all_graphs = graphs_maxsum + graphs_raindry + graph_maxdate
     labels = [": ".join(i) for i in product(label_ufunc, label_periods)]
-    labels += ["Maximum Rainfall Occurrence"]
+    labels += ["Maximum Rainfall Events"]
 
     children = pylayoutfunc.create_tabcard_graph_layout(all_graphs, labels)
 

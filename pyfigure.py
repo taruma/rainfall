@@ -129,7 +129,7 @@ def figure_summary_maxsum(
     ufunc_cols = ["max", "sum"] if ufunc_cols is None else ufunc_cols
     subplot_titles = ufunc_cols if subplot_titles is None else subplot_titles
 
-    if summary.size > THRESHOLD_SUMMARY:
+    if (summary.size > THRESHOLD_SUMMARY) or (summary.index.size > THRESHOLD_XAXES):
         return dcc.Graph(
             figure=figure_empty("dataset above threshold"), config={"staticPlot": True}
         )

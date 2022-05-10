@@ -37,7 +37,7 @@ def create_table_layout(
         if (filename is not None) and (filedate is not None)
         else ""
     )
-    title_table = f"TABEL DATA" + add_title
+    title_table = f"DATA TABLE" + add_title
     return html.H2(title_table, className="text-center"), table
 
 
@@ -113,7 +113,7 @@ def create_tabcard_graph_layout(
     return dbc.Tabs(tab)
 
 
-def create_HTML_alert(alert: dbc.Alert, className: str='my-2'):
+def create_HTML_alert(alert: dbc.Alert, className: str = "my-2"):
     return html.Div(
         dbc.Container(
             dbc.Row([dbc.Col(alert, width="auto")], justify="center"),
