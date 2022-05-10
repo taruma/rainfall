@@ -55,13 +55,16 @@ def generate_summary_single(dataframe, n_days="1MS"):
         return np.logical_or(vector.isna(), vector == 0).sum()
 
     def max_date(vector):
-        return vector.idxmax().strftime("%d %B %Y")
+        if vector.any():
+            return vector.idxmax().date()
+        else:
+            return np.nan
 
-    def n_max(vector):
+    def max(vector):
         return vector.max()
 
-    ufunc = [days, n_max, sum, n_rain, n_dry, max_date]
-    ufunc_col = ["days", "n_max", "sum", "n_rain", "n_dry", "max_date"]
+    ufunc = [days, max, sum, n_rain, n_dry, max_date]
+    ufunc_col = ["days", "max", "sum", "n_rain", "n_dry", "max_date"]
 
     summary = hk98.summary_all(
         dataframe, ufunc=ufunc, ufunc_col=ufunc_col, n_days=n_days
@@ -80,12 +83,24 @@ def generate_summary_all(dataframe, n_days: list = None):
     return summary_all
 
 
-def transform_to_dataframe(table_data, table_columns):
+def transform_to_dataframe(
+    table_data, table_columns, multiindex: bool = False, apply_numeric: bool = True
+):
 
     dataframe = pd.DataFrame(table_data)
-    dataframe.columns = [i["name"] for i in table_columns]
+    if multiindex is True:
+        dataframe.columns = pd.MultiIndex.from_tuples(
+            [item["name"] for item in table_columns]
+        )
+    else:
+        dataframe.columns = [item["name"] for item in table_columns]
+
     dataframe["DATE"] = pd.to_datetime(dataframe.DATE)
     dataframe = dataframe.set_index("DATE").sort_index()
-    dataframe = dataframe.apply(pd.to_numeric, errors="coerce")
+
+    if apply_numeric is True:
+        dataframe = dataframe.apply(pd.to_numeric, errors="coerce")
+    else:
+        dataframe = dataframe.infer_objects()
 
     return dataframe

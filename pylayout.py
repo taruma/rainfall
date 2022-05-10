@@ -1,95 +1,12 @@
-from dash import html, dcc, dash_table
+from dash import html, dcc
 import dash_bootstrap_components as dbc
 from pyconfig import appConfig
+import plotly.io as pio
 from pytemplate import hktemplate
-from datetime import datetime
 import pyfigure
+import pylayoutfunc
 
-
-def create_table_layout(
-    dataframe,
-    idtable,
-    filename=None,
-    filedate=None,
-    editable=False,
-    deletable=True,
-    renamable=False,
-):
-    new_dataframe = dataframe.reset_index()
-    new_dataframe.DATE = new_dataframe.DATE.dt.date
-    table = dash_table.DataTable(
-        id=idtable,
-        columns=[
-            {"name": i, "id": i, "deletable": deletable, "renamable": renamable}
-            for i in new_dataframe.columns
-        ],
-        data=new_dataframe.to_dict("records"),
-        page_size=20,
-        editable=editable,
-        cell_selectable=True,
-        filter_action="native",
-        sort_action="native",
-        style_table={"overflowX": "auto"},
-        style_cell={"font-family": hktemplate.layout.font.family},
-        style_header={"font-size": 20, "textAlign": "center", "font-weight": "bold"},
-    )
-    add_title = (
-        f' ({filename}:{datetime.fromtimestamp(filedate).strftime("%Y-%m-%d")})'
-        if (filename is not None) and (filedate is not None)
-        else ""
-    )
-    title_table = f"TABEL DATA" + add_title
-    return html.H2(title_table, className="text-center"), table
-
-
-def create_table_summary(
-    summary,
-    idtable,
-    editable=False,
-    deletable=True,
-    renamable=False,
-):
-    new_summary = summary.reset_index()
-    new_summary.DATE = new_summary.DATE.dt.date
-
-    flatten_index = new_summary.columns.to_flat_index()
-    new_id = ["_".join(colx) if colx[1] != "" else colx[0] for colx in flatten_index]
-    new_summary.columns = new_id
-
-    table = dash_table.DataTable(
-        id=idtable,
-        columns=[
-            {"name": name, "id": id, "deletable": deletable, "renamable": renamable}
-            for name, id in zip(flatten_index, new_id)
-        ],
-        data=new_summary.to_dict("records"),
-        page_size=20,
-        editable=editable,
-        cell_selectable=True,
-        filter_action="native",
-        sort_action="native",
-        style_table={"overflowX": "auto"},
-        style_cell={"font-family": hktemplate.layout.font.family},
-        style_header={"font-size": 20, "textAlign": "center", "font-weight": "bold"},
-        merge_duplicate_headers=True,
-    )
-    return table
-
-
-def create_tabcard_layout(tables: list, tab_names: list = None, disabled: list = None):
-
-    disabled = [False] * len(tables) if disabled is None else disabled
-    tab_names = ["Biweekly", "Monthly", "Yearly"] if tab_names is None else tab_names
-
-    tab = []
-    for table, tab_name, active in zip(tables, tab_names, disabled):
-        _tab = dbc.Tab(
-            dbc.Card(dbc.CardBody([table]), class_name="my-3"), label=tab_name
-        )
-        tab.append(_tab)
-
-    return dbc.Tabs(tab)
-
+pio.templates.default = hktemplate
 
 HTML_TITLE = html.Div(
     [
@@ -99,7 +16,6 @@ HTML_TITLE = html.Div(
         ),
         html.Span(
             [appConfig.GITHUB_REPO, "@", appConfig.VERSION],
-            # href=appConfig.GITHUB_LINK,
             className="text-muted",
         ),
     ],
@@ -118,26 +34,33 @@ HTML_SUBTITLE = html.P(
 
 ALERT_CONTRIBUTION = dbc.Alert(
     [
-        "Tertarik untuk berkontribusi atau ikut bergabung untuk proyek seperti ini? Hubungi saya di ",
+        "Tertarik untuk berkontribusi? Ingin terlibat proyek hidrokit seperti ini? hubungi saya di ",
         html.A("hi@taruma.info", href="mailto:hi@taruma.info", className="text-bold"),
-        ". Atau kunjungi langsung repository proyek ini di ",
+        ". Langsung buat isu di ",
         html.A("Github", href=appConfig.GITHUB_LINK),
-        ".",
+        " jika memiliki pertanyaan/komentar/kritik/saran atau menemui kesalahan di proyek ini.",
     ]
 )
 
-HTML_ALERT = html.Div(
-    dbc.Container(
-        dbc.Row([dbc.Col(ALERT_CONTRIBUTION, width="auto")], justify="center"),
-        fluid=True,
-    ),
-    className="my-2",
+HTML_ALERT_CONTRIBUTION = pylayoutfunc.create_HTML_alert(ALERT_CONTRIBUTION)
+
+ALERT_README = dbc.Alert(
+    [
+        "Untuk petunjuk penggunaan bisa baca ",
+        html.A(
+            "README di github",
+            href="https://github.com/taruma/dash-hidrokit-rainfall#readme",
+        ),
+        ".",
+    ],
+    color="warning",
 )
 
+HTML_ALERT_README = pylayoutfunc.create_HTML_alert(ALERT_README, className="")
 
 DCC_UPLOAD = html.Div(
     dcc.Upload(
-        id="upload-data",
+        id="dcc-upload",
         children=html.Div(
             [
                 dbc.Button(
@@ -180,30 +103,20 @@ HTML_ROW_BUTTON_UPLOAD = html.Div(
             ),
         ],
         fluid=True,
-        class_name="",
     ),
 )
 
 HTML_ROW_TABLE = html.Div(
     dbc.Container(
         [
-            dbc.Row(
-                [
-                    dbc.Col(
-                        html.Div(
-                            dbc.Card(
-                                dbc.CardBody(
-                                    id="output-data-upload",
-                                    children=dcc.Graph(
-                                        figure=pyfigure.figure_empty(),
-                                        config={"staticPlot": True},
-                                    ),
-                                ),
-                            )
-                        ),
-                        class_name="",
+            dbc.Card(
+                dbc.CardBody(
+                    id="row-table-uploaded",
+                    children=dcc.Graph(
+                        figure=pyfigure.figure_empty(),
+                        config={"staticPlot": True},
                     ),
-                ],
+                ),
             ),
         ],
         fluid=True,
@@ -217,40 +130,35 @@ HTML_ROW_BUTTON_VIZ = html.Div(
             dbc.Row(
                 [
                     dbc.Col(
-                        [
-                            dbc.Button(
-                                "Visualize Data",
-                                color="success",
-                                outline=True,
-                                class_name="fs-4 text-center fw-bold",
-                                id="button-visualize",
-                                disabled=True,
-                            ),
-                        ],
+                        dbc.Button(
+                            "Visualize Data",
+                            color="success",
+                            outline=True,
+                            class_name="fs-4 fw-bold",
+                            id="button-visualize",
+                            disabled=True,
+                        ),
                         width="auto",
                     ),
                     dbc.Col(
                         [
                             dbc.Button(
-                                [
-                                    "Download Table As CSV",
-                                ],
+                                "Download Table as CSV",
                                 color="primary",
-                                className="me-1 fs-4",
+                                className="fs-4",
                                 id="button-download-csv",
                             ),
                             dcc.Download(id="download-csv"),
                         ],
                         width="auto",
                         style={"visibility": "hidden"},
-                        id="visibility-download-button",
+                        id="row-button-download-csv",
                     ),
                 ],
                 justify="center",
-                class_name="m-3",
             )
         ],
-        class_name="mt-5",
+        class_name="my-4",
     )
 )
 
@@ -261,7 +169,7 @@ HTML_ROW_OPTIONS_GRAPH_RAINFALL = html.Div(
                 [
                     dbc.Col(
                         [
-                            dbc.Label("Small Dataset Options:"),
+                            dbc.Label("Small Dataset (<= 2,920 data points) Options:"),
                             dbc.RadioItems(
                                 options=[
                                     {"label": "Stack", "value": "stack"},
@@ -269,7 +177,7 @@ HTML_ROW_OPTIONS_GRAPH_RAINFALL = html.Div(
                                     {"label": "Line", "value": "line"},
                                 ],
                                 value="stack",
-                                id="graph-bar-options",
+                                id="radio-graphbar-options",
                                 inline=True,
                             ),
                         ],
@@ -277,7 +185,6 @@ HTML_ROW_OPTIONS_GRAPH_RAINFALL = html.Div(
                     )
                 ],
                 justify="center",
-                class_name="",
             )
         ],
         fluid=True,
@@ -289,19 +196,12 @@ HTML_ROW_OPTIONS_GRAPH_RAINFALL = html.Div(
 HTML_ROW_GRAPH_ONE = html.Div(
     dbc.Container(
         [
-            dbc.Row(
-                [
-                    dbc.Col(
-                        dcc.Loading(
-                            dcc.Graph(
-                                id="section-graph",
-                                figure=pyfigure.figure_empty(),
-                                config={"staticPlot": True},
-                            )
-                        )
-                    )
-                ],
-                justify="center",
+            dcc.Loading(
+                dcc.Graph(
+                    id="graph-rainfall",
+                    figure=pyfigure.figure_empty(),
+                    config={"staticPlot": True},
+                )
             )
         ],
         fluid=True,
@@ -331,44 +231,113 @@ HTML_ROW_BUTTON_ANALYZE = html.Div(
                     )
                 ],
                 justify="center",
-                class_name="m-4",
             )
         ],
         fluid=True,
-        id="row-download",
+        class_name="my-5",
     )
 )
 
 HTML_ROW_TABLE_ANALYZE = html.Div(
     dbc.Container(
+        dcc.Loading(
+            children=dcc.Graph(
+                figure=pyfigure.figure_empty(),
+                config={"staticPlot": True},
+            ),
+            id="tab-analysis",
+        ),
+        fluid=True,
+    )
+)
+
+HTML_ROW_BUTTON_VIZ_ANALYSIS = html.Div(
+    dbc.Container(
         [
             dbc.Row(
                 [
                     dbc.Col(
-                        dcc.Loading(
-                            html.Div(
-                                children=dcc.Graph(
-                                    figure=pyfigure.figure_empty(),
-                                    config={"staticPlot": True},
-                                ),
-                                id="col-table-analyze",
+                        [
+                            dbc.Button(
+                                [
+                                    "Visualize it!",
+                                ],
+                                color="danger",
+                                className="me-1 fs-4",
+                                outline=True,
+                                id="button-viz-analysis",
+                                disabled=True,
                             ),
-                        ),
-                    )
+                        ],
+                        width="auto",
+                    ),
+                    dbc.Col(
+                        [
+                            dbc.Button(
+                                "Download Results as CSV",
+                                color="primary",
+                                className="fs-4",
+                                id="button-download-analysis-csv",
+                            ),
+                            dcc.Download(id="download-analysis-csv"),
+                        ],
+                        width="auto",
+                        style={"visibility": "hidden"},
+                        id="row-button-download-analysis-csv",
+                    ),
                 ],
                 justify="center",
             )
         ],
         fluid=True,
+        class_name="my-5",
     )
 )
 
-# HTML_ROW_TABLE_ANALYZE = html.Div(dbc.Container(["EMPTY"], id="col-table-analyze"))
+HTML_ROW_GRAPH_ANALYSIS = html.Div(
+    dbc.Container(
+        dcc.Loading(
+            children=dcc.Graph(
+                figure=pyfigure.figure_empty(),
+                config={"staticPlot": True},
+            ),
+            id="tab-graph-analysis",
+        ),
+        fluid=True,
+    )
+)
+
+
+_HTML_TROUBLESHOOT = html.Div(
+    dbc.Container(
+        [
+            dbc.Row([html.Div("HEELLOOOO")]),
+            dbc.Button("Hello", id="button-troubleshoot"),
+            html.Div(id="row-troubleshoot"),
+        ],
+        fluid=True,
+    )
+)
+
+HTML_OTHER_PROJECTS = html.Div(
+    [
+        html.Span("other dashboard:"),
+        html.A(
+            [
+                html.Del("BMKG", style={"text-decoration-style": "double"}),
+                " 🛖 Explorer",
+            ],
+            href="https://github.com/taruma/dash-data-explorer",
+            style={"text-decoration": "none"},
+        ),
+    ],
+    className="d-flex gap-2 justify-content-center my-2",
+)
 
 HTML_MADEBY = html.Div(
     dcc.Markdown(
-        "made with [Dash+Plotly](https://plotly.com)".lower(),
-        className="fs-4 text-center mt-5",
+        "Made with [Dash+Plotly](https://plotly.com).",
+        className="fs-4 text-center mt-2",
     ),
 )
 

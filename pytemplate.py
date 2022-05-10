@@ -2,31 +2,21 @@
 import plotly.io as pio
 from dash_bootstrap_templates import load_figure_template
 from pyconfig import appConfig
+from plotly import colors
 
 load_figure_template(appConfig.DASH_THEME.THEME.lower())
 hktemplate = pio.templates[pio.templates.default]
 
-# SETUP
+# VARS
 _TEMPLATE = appConfig.TEMPLATE
 _FONT_FAMILY = hktemplate.layout.font.family
+_FONT_COLOR_TUPLE = colors.hex_to_rgb(hktemplate.layout.font.color)
+_FONT_COLOR_RGB_ALPHA = "rgba({},{},{},0.4)".format(*_FONT_COLOR_TUPLE)
 
-# LAYOUT
-## LOGO
-# _SOURCE_LOGO = _TEMPLATE.LOGO_SOURCE
+## LAYOUT
+# WATERMARK
 _SOURCE_WATERMARK = _TEMPLATE.WATERMARK_SOURCE
 hktemplate.layout.images = [
-    # dict(
-    #     source=_SOURCE_LOGO,
-    #     xref="paper",
-    #     yref="paper",
-    #     x=1,
-    #     y=1.015,
-    #     sizex=0.11,
-    #     sizey=0.11,
-    #     xanchor="right",
-    #     yanchor="bottom",
-    #     name="logo-hidrokit",
-    # ),
     dict(
         source=_SOURCE_WATERMARK,
         xref="x domain",
@@ -57,7 +47,8 @@ hktemplate.layout.paper_bgcolor = hktemplate.layout.plot_bgcolor
 _LEGEND_FONT_SIZE = 15
 hktemplate.layout.showlegend = True
 hktemplate.layout.legend.font.size = _LEGEND_FONT_SIZE
-hktemplate.layout.legend.title.text = "<b>placeholder</b>"
+hktemplate.layout.legend.groupclick = "toggleitem"
+# hktemplate.layout.legend.title.text = "<b>placeholder</b>"
 
 
 def apply_legend_inside():
@@ -91,7 +82,7 @@ hktemplate.layout.newshape.line.width = 3
 hktemplate.layout.hoverlabel.font.family = _FONT_FAMILY
 
 # TITLE
-hktemplate.layout.title.text = "<b>PLACEHOLDER TITLE</b>"
+# hktemplate.layout.title.text = "<b>PLACEHOLDER TITLE</b>"
 hktemplate.layout.title.pad = dict(b=10, l=0, r=0, t=0)
 hktemplate.layout.title.x = 0
 hktemplate.layout.title.xref = "paper"
@@ -110,7 +101,9 @@ hktemplate.layout.xaxis.showline = True
 hktemplate.layout.xaxis.linewidth = _XAXIS_LINEWIDTH
 hktemplate.layout.xaxis.linecolor = _XAXIS_GRIDCOLOR
 hktemplate.layout.xaxis.spikecolor = _XAXIS_GRIDCOLOR
-hktemplate.layout.xaxis.title.text = "<b>PLACEHOLDER XAXIS</b>"
+hktemplate.layout.xaxis.gridcolor = _FONT_COLOR_RGB_ALPHA
+hktemplate.layout.xaxis.gridwidth = _XAXIS_LINEWIDTH
+# hktemplate.layout.xaxis.title.text = "<b>PLACEHOLDER XAXIS</b>"
 hktemplate.layout.xaxis.title.font.size = _XAXIS_TITLE_FONT_SIZE
 hktemplate.layout.xaxis.title.standoff = _XAXIS_TITLE_STANDOFF
 
@@ -167,9 +160,15 @@ hktemplate.layout.yaxis.linewidth = _YAXIS_LINEWIDTH
 hktemplate.layout.yaxis.linecolor = _YAXIS_GRIDCOLOR
 hktemplate.layout.yaxis.spikecolor = _YAXIS_GRIDCOLOR
 hktemplate.layout.yaxis.rangemode = "tozero"
-hktemplate.layout.yaxis.title.text = "<b>PLACEHOLDER XAXIS</b>"
+hktemplate.layout.yaxis.gridcolor = _FONT_COLOR_RGB_ALPHA
+hktemplate.layout.yaxis.gridwidth = _YAXIS_LINEWIDTH
+# hktemplate.layout.yaxis.title.text = "<b>PLACEHOLDER XAXIS</b>"
 hktemplate.layout.yaxis.title.font.size = _YAXIS_TITLE_FONT_SIZE
 hktemplate.layout.yaxis.title.standoff = _YAXIS_TITLE_STANDOFF
+
+# SUBPLOTS
+# ANNOTATION
+hktemplate.layout.annotationdefaults.font.color = hktemplate.layout.font.color
 
 ## PLOT SPECIFIC
 
