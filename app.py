@@ -219,9 +219,11 @@ def callback_troubleshoot(_):
         )
         for summary, title, period in zip(SUMMARY_ALL, label_raindry * 3, label_periods)
     ]
+    graph_maxdate = [pyfigure.figure_summary_maxdate(SUMMARY_ALL)]
 
-    all_graphs = graphs_maxsum + graphs_raindry
+    all_graphs = graphs_maxsum + graphs_raindry + graph_maxdate
     labels = [": ".join(i) for i in product(label_ufunc, label_periods)]
+    labels += ["Maximum Rainfall Occurrence"]
 
     children = pylayoutfunc.create_tabcard_graph_layout(all_graphs, labels)
 

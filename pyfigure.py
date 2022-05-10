@@ -5,10 +5,14 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 import pytemplate
+import pandas as pd
 from collections import defaultdict
+from itertools import cycle, islice
 
 THRESHOLD_SUMMARY = (367 * 8) // 2
 THRESHOLD_GRAPH_RAINFALL = 365 * 8
+THRESHOLD_XAXES = 12 * 2 * 5
+THRESHOLD_STATIONS = 8
 
 
 def _generate_dict_watermark(n: int = 1, source=appConfig.TEMPLATE.WATERMARK_SOURCE):
@@ -100,7 +104,7 @@ def figure_bar(dataframe, barmode="stack"):
     return fig
 
 
-def figure_empty():
+def figure_empty(text: str = "", size: int = 40):
     data = [{"x": [], "y": []}]
     layout = go.Layout(
         title={"text": "", "x": 0.5},
@@ -117,6 +121,20 @@ def figure_empty():
             "zeroline": False,
         },
         margin=dict(t=55, l=55, r=55, b=55),
+        annotations=[
+            dict(
+                name="text",
+                text=f"<i>{text}</i>",
+                opacity=0.3,
+                font_size=size,
+                xref="x domain",
+                yref="y domain",
+                x=0.5,
+                y=0.05,
+                showarrow=False,
+            )
+        ],
+        height=450,
     )
 
     return go.Figure(data, layout)
@@ -136,7 +154,9 @@ def figure_summary_maxsum(
     subplot_titles = ufunc_cols if subplot_titles is None else subplot_titles
 
     if summary.size > THRESHOLD_SUMMARY:
-        return dcc.Graph(figure=figure_empty(), config={"staticPlot": True})
+        return dcc.Graph(
+            figure=figure_empty("dataset above threshold"), config={"staticPlot": True}
+        )
 
     fig = make_subplots(
         rows=rows,
@@ -184,9 +204,16 @@ def figure_summary_maxsum(
         if period.lower() == "yearly":
             ticktext = series.index.strftime("%Y")
 
+    if series.index.size <= THRESHOLD_XAXES:
+        xticktext = ticktext
+        xtickvals = np.arange(series.index.size)
+    else:
+        xticktext = ticktext[::2]
+        xtickvals = np.arange(series.index.size)[::2]
+
     UPDATE_XAXES = {
-        "ticktext": ticktext,
-        "tickvals": np.arange(series.index.size),
+        "ticktext": xticktext,
+        "tickvals": xtickvals,
         "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA,
         "gridwidth": 2,
     }
@@ -207,7 +234,6 @@ def figure_summary_maxsum(
             update_axis(fig, update, n_row, axis)
 
     # ref: https://stackoverflow.com/questions/39863250
-    from itertools import cycle, islice
 
     n_data = len(fig.data)
     n_split = n_data // 2
@@ -225,7 +251,7 @@ def figure_summary_maxsum(
 
 
 def figure_summary_raindry(
-    summary,
+    summary: pd.DataFrame,
     ufunc_cols: list[str] = None,
     rows: int = None,
     cols: int = 1,
@@ -241,32 +267,61 @@ def figure_summary_raindry(
         summary.columns.levels[0] if subplot_titles is None else subplot_titles
     )
 
-    if summary.size > THRESHOLD_SUMMARY:
-        return dcc.Graph(figure=figure_empty(), config={"staticPlot": True})
+    if (summary.size > THRESHOLD_SUMMARY) or (summary.index.size > THRESHOLD_XAXES):
+        return dcc.Graph(
+            figure=figure_empty("dataset above threshold"), config={"staticPlot": True}
+        )
+
+    vertical_spacing = 0.2 / rows
 
     fig = make_subplots(
         rows=rows,
         cols=cols,
         shared_xaxes=True,
-        vertical_spacing=0.03,
+        vertical_spacing=vertical_spacing,
         subplot_titles=subplot_titles,
     )
 
     fig.layout.images = [_generate_dict_watermark(n) for n in range(2, rows + 1)]
 
+    for station in summary.columns.levels[0]:
+        summary[(station, "n_left")] = (
+            summary[(station, "days")].max()
+            - summary[(station, "n_rain")]
+            - summary[(station, "n_dry")]
+        )
+
     data_dict = defaultdict(list)
 
     for station in summary.columns.levels[0]:
         for ufcol, series in summary[station].items():
-            if ufcol in ufunc_cols:
-                _bar = go.Bar(
-                    x=np.arange(series.index.size),
-                    y=series,
-                    name=f"{station} ({ufcol})",
-                    legendgroup=station,
-                    legendgrouptitle_text=station,
-                )
-                data_dict[station].append(_bar)
+            if ufcol in ufunc_cols + ["n_left"]:
+                if ufcol in ufunc_cols:
+                    _bar = go.Bar(
+                        x=np.arange(series.index.size),
+                        y=series,
+                        name=f"{station} ({ufcol})",
+                        legendgroup=station,
+                        legendgrouptitle_text=station,
+                        marker_line_width=0,
+                        customdata=series.index,
+                        hovertemplate=f"{station}<br>{ufcol}: %{{y}}<extra></extra>",
+                    )
+                    data_dict[station].append(_bar)
+                if ufcol == "n_left":
+                    _bar = go.Bar(
+                        x=np.arange(series.index.size),
+                        y=series,
+                        name=f"<i>{station} (border)</i>",
+                        legendgroup=station,
+                        legendgrouptitle_text=station,
+                        showlegend=True,
+                        hoverinfo="skip",
+                        marker_line_width=0,
+                        marker_opacity=1,
+                        legendrank=500,
+                    )
+                    data_dict[station].append(_bar)
 
     for counter, (ufcol, data) in enumerate(data_dict.items(), 1):
         fig.add_traces(data, rows=counter, cols=cols)
@@ -275,7 +330,7 @@ def figure_summary_raindry(
         title={"text": title, "pad": {"b": 20}},
         barmode="stack",
         hovermode="x",
-        height=max([800, 250 * rows]),
+        height=max([600, 250 * rows]),
         bargap=0,
         dragmode="zoom",
         legend={"title": "<b>Stations</b>"},
@@ -289,11 +344,20 @@ def figure_summary_raindry(
         if period.lower() == "yearly":
             ticktext = series.index.strftime("%Y")
 
+    if series.index.size <= THRESHOLD_XAXES:
+        xticktext = ticktext
+        xtickvals = np.arange(series.index.size)
+    else:
+        xticktext = ticktext[::2]
+        xtickvals = np.arange(series.index.size)[::2]
+
     UPDATE_XAXES = {
-        "ticktext": ticktext,
-        "tickvals": np.arange(series.index.size),
-        "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA,
+        "ticktext": xticktext,
+        "tickvals": xtickvals,
+        "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA.replace("0.4", "0.1"),
         "gridwidth": 2,
+        # "nticks": 2,
+        "ticklabelstep": 2,
     }
 
     UPDATE_YAXES = {
@@ -301,6 +365,7 @@ def figure_summary_raindry(
         "gridwidth": 2,
         "fixedrange": True,
         "title": "<b>Days</b>",
+        "range": [0, summary[(station, "days")].max()],
     }
 
     def update_axis(fig, update, n, axis: str = "x"):
@@ -313,9 +378,133 @@ def figure_summary_raindry(
         for axis, update in zip(["x", "y"], [UPDATE_XAXES, UPDATE_YAXES]):
             update_axis(fig, update, n_row, axis)
 
-    color_list = pytemplate.hktemplate.layout.colorway[:2]
+    color_list = list(pytemplate.hktemplate.layout.colorway[:2]) + ["DarkGray"]
 
     for data, color in zip(fig.data, color_list * rows):
+        data.marker.color = color
+
+    return dcc.Graph(figure=fig)
+
+
+def figure_summary_maxdate(
+    summary_all: pd.DataFrame,
+    ufunc_col: list[str] = None,
+    rows: int = 3,
+    cols: int = 1,
+    subplot_titles: list[str] = None,
+    title: str = "Maximum Rainfall Occurrence",
+    periods: list[str] = None,
+    bubble_sizes: list[int] = None,
+):
+
+    if summary_all[0].size > THRESHOLD_SUMMARY:
+        return dcc.Graph(
+            figure=figure_empty("dataset above threshold"), config={"staticPlot": True}
+        )
+
+    ufunc_col = ["max_date"] if ufunc_col is None else ufunc_col
+    subplot_titles = (
+        ["Biweekly", "Monthly", "Yearly"] if subplot_titles is None else subplot_titles
+    )
+    periods = ["biweekly", "monthly", "yearly"] if periods is None else periods
+
+    fig = make_subplots(
+        rows=rows,
+        cols=cols,
+        shared_xaxes=True,
+        vertical_spacing=0.05,
+        subplot_titles=subplot_titles,
+    )
+
+    fig.layout.images = [_generate_dict_watermark(n) for n in range(2, rows + 1)]
+
+    # Create new DF
+
+    all_stat = []
+    for summary, period in zip(summary_all, periods):
+        for station in summary.columns.levels[0]:
+            _max = summary[station].dropna(subset=ufunc_col)
+            _max["max_date"] = pd.to_datetime(_max["max_date"])
+            _max = _max.set_index("max_date")[["max"]]
+            _max.columns = pd.MultiIndex.from_tuples([(period, station)])
+            all_stat.append(_max)
+
+    all_df = pd.concat(all_stat, axis=1)
+
+    bubble_sizes = [8, 9, 10] if bubble_sizes is None else bubble_sizes
+
+    data_dict = defaultdict(list)
+    for period, bubble_size in zip(all_df.columns.levels[0], bubble_sizes):
+        sizeref = 2.0 * all_df[period].max().max() / (bubble_size**2)
+        for station, series in all_df[period].items():
+            yvals = series.where(~series.notna(), station)
+            _scatter = go.Scatter(
+                x=series.index,
+                y=yvals,
+                mode="markers",
+                marker_size=series.fillna(0),
+                marker_sizeref=sizeref,
+                legendgroup=station,
+                legendgrouptitle_text=station,
+                name=f"{period}",
+                hovertemplate="<i>%{y}</i><br>%{customdata[0]}<br>%{customdata[1]} mm<extra></extra>",
+                customdata=np.stack(
+                    [
+                        series.index.strftime("%d %B %Y"),
+                        series.to_numpy(),
+                    ],
+                    axis=-1,
+                ),
+            )
+            data_dict[period].append(_scatter)
+
+    for counter, (period, data) in enumerate(data_dict.items(), 1):
+        fig.add_traces(data, rows=counter, cols=cols)
+
+    fig.update_layout(
+        title_text=title,
+        title_pad_b=20,
+        height=1000,
+        dragmode="zoom",
+        legend_title="<b>Stations</b>",
+        legend_itemsizing="constant",
+        hovermode="closest",
+    )
+
+    def update_axis(fig, update, n, axis: str = "x"):
+        n = "" if n == 1 else n
+        fig.update(layout={f"{axis}axis{n}": update})
+
+    # XAXES
+
+    fig.update(layout={f"xaxis{rows}": {"title": "<b>Date</b>"}})
+
+    # GENERAL UPDATE
+    UPDATE_XAXES = {
+        "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA.replace("0.4", "0.1"),
+        "gridwidth": 2,
+    }
+    UPDATE_YAXES = {
+        "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA.replace("0.4", "0.1"),
+        "gridwidth": 2,
+        "fixedrange": True,
+        "title": "<b>Station</b>",
+    }
+
+    for n_row in range(1, rows + 1):
+        for axis, update in zip(["x", "y"], [UPDATE_XAXES, UPDATE_YAXES]):
+            update_axis(fig, update, n_row, axis)
+
+    n_data = len(fig.data)
+    n_split = n_data // 3
+
+    if n_split < len(pytemplate.hktemplate.layout.colorway):
+        colors = list(pytemplate.hktemplate.layout.colorway[:n_split])
+    else:
+        colorway_list = pytemplate.hktemplate.layout.colorway
+        colors = list(islice(cycle(colorway_list), n_split))
+
+    for data, color in zip(fig.data, colors * 3):
         data.marker.color = color
 
     return dcc.Graph(figure=fig)

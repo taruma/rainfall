@@ -58,7 +58,7 @@ def generate_summary_single(dataframe, n_days="1MS"):
         if vector.any():
             return vector.idxmax().date()
         else:
-            return "No Data/Rainfall"
+            return np.nan
 
     def max(vector):
         return vector.max()
