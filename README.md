@@ -1,6 +1,6 @@
 # Dashboard Rainfall Data Explorer
 
-![image](https://user-images.githubusercontent.com/1007910/167583978-b23aedef-bbd7-4b0f-8b3b-94c0d56868b6.png)
+![image](https://user-images.githubusercontent.com/1007910/167613715-7b3db12e-47e5-4d43-8765-19ac3551ed46.png)
 
 __Rainfall Data Explorer__ (`hkrainfall`) adalah _dashboard_ untuk mengeksplorasi data hujan di setiap stasiunnya dan membandingkannya baik secara numerik maupun visual. `hkrainfall` dibuat menggunakan teknologi [Dash + Plotly](https://plotly.com/) dengan bahasa pemrograman Python. Proyek `hkrainfall` bersifat _open-source_ dengan lisensi MIT.
 
