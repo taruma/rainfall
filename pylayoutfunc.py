@@ -111,3 +111,13 @@ def create_tabcard_graph_layout(
         tab.append(_tab)
 
     return dbc.Tabs(tab)
+
+
+def create_HTML_alert(alert: dbc.Alert, className: str='my-2'):
+    return html.Div(
+        dbc.Container(
+            dbc.Row([dbc.Col(alert, width="auto")], justify="center"),
+            fluid=True,
+        ),
+        className=className,
+    )

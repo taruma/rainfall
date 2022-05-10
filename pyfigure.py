@@ -33,32 +33,8 @@ def _generate_dict_watermark(n: int = 1, source=appConfig.TEMPLATE.WATERMARK_SOU
     )
 
 
-def figure_test_scatter():
-    data = [{"x": np.arange(1, 11), "y": np.random.randint(0, 10, 10)}]
-    layout = go.Layout()
-    return go.Figure(data, layout)
-
-
-def figure_test_heatmap():
-    data = [[1, np.nan, 30, 50, 1], [20, 1, np.nan, 80, 30], [30, 60, np.nan, 5, 20]]
-    fig = px.imshow(
-        data,
-        labels=dict(x="Day of Week", y="Time of Day", color="Productivity"),
-        x=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-        y=["Morning", "Afternoon", "Evening"],
-        aspect="auto",
-    )
-    return fig
-
-
-def figure_test_heatmap2():
-    data = go.Heatmap(z=[[1, 20, 30], [20, np.nan, 60], [30, 60, 1]])
-    layout = go.Layout()
-    return go.Figure(data, layout)
-
-
 LABEL_GRAPH_RAINFALL = dict(
-    title="<b>Rainfall Each Stations</b>",
+    title="<b>Rainfall Each Station</b>",
     yaxis={"title": "<b>Rainfall (mm)</b>"},
     xaxis={"title": "<b>Date</b>"},
     legend={"title": "Stations"},
@@ -214,12 +190,12 @@ def figure_summary_maxsum(
     UPDATE_XAXES = {
         "ticktext": xticktext,
         "tickvals": xtickvals,
-        "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA,
+        "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA.replace("0.4", "0.2"),
         "gridwidth": 2,
     }
 
     UPDATE_YAXES = {
-        "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA,
+        "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA.replace("0.4", "0.2"),
         "gridwidth": 2,
         "fixedrange": True,
         "title": "<b>Rainfall (mm)</b>",
@@ -361,7 +337,7 @@ def figure_summary_raindry(
     }
 
     UPDATE_YAXES = {
-        "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA,
+        "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA.replace("0.4", "0.1"),
         "gridwidth": 2,
         "fixedrange": True,
         "title": "<b>Days</b>",
@@ -392,7 +368,7 @@ def figure_summary_maxdate(
     rows: int = 3,
     cols: int = 1,
     subplot_titles: list[str] = None,
-    title: str = "Maximum Rainfall Occurrence",
+    title: str = "Maximum Rainfall Events",
     periods: list[str] = None,
     bubble_sizes: list[int] = None,
 ):
@@ -447,7 +423,7 @@ def figure_summary_maxdate(
                 legendgroup=station,
                 legendgrouptitle_text=station,
                 name=f"{period}",
-                hovertemplate="<i>%{y}</i><br>%{customdata[0]}<br>%{customdata[1]} mm<extra></extra>",
+                hovertemplate="<i>%{y}</i><br>%{customdata[0]}<br>%{marker.size} mm<extra></extra>",
                 customdata=np.stack(
                     [
                         series.index.strftime("%d %B %Y"),
@@ -464,11 +440,12 @@ def figure_summary_maxdate(
     fig.update_layout(
         title_text=title,
         title_pad_b=20,
-        height=1000,
+        height=800,
         dragmode="zoom",
         legend_title="<b>Stations</b>",
         legend_itemsizing="constant",
-        hovermode="closest",
+        hovermode="x",
+        hoverdistance=50,
     )
 
     def update_axis(fig, update, n, axis: str = "x"):
@@ -483,6 +460,10 @@ def figure_summary_maxdate(
     UPDATE_XAXES = {
         "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA.replace("0.4", "0.1"),
         "gridwidth": 2,
+        "showspikes": True,
+        "spikesnap": "cursor",
+        "spikemode": "across",
+        "spikethickness": 1,
     }
     UPDATE_YAXES = {
         "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA.replace("0.4", "0.1"),

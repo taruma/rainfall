@@ -41,7 +41,7 @@ app.layout = dbc.Container(
     [
         pylayout.HTML_TITLE,
         pylayout.HTML_SUBTITLE,
-        pylayout.HTML_ALERT,
+        pylayout.HTML_ALERT_README,
         pylayout.HTML_ROW_BUTTON_UPLOAD,
         pylayout.HTML_ROW_TABLE,
         pylayout.HTML_ROW_BUTTON_VIZ,
@@ -49,8 +49,11 @@ app.layout = dbc.Container(
         pylayout.HTML_ROW_GRAPH_ONE,
         pylayout.HTML_ROW_BUTTON_ANALYZE,
         pylayout.HTML_ROW_TABLE_ANALYZE,
-        pylayout._HTML_TROUBLESHOOT,
+        pylayout.HTML_ROW_BUTTON_VIZ_ANALYSIS,
+        pylayout.HTML_ROW_GRAPH_ANALYSIS,
+        pylayout.HTML_ALERT_CONTRIBUTION,
         pylayout.HTML_MADEBY,
+        pylayout.HTML_OTHER_PROJECTS,
         pylayout.HTML_FOOTER,
     ],
     fluid=True,
@@ -80,7 +83,7 @@ def callback_upload(content, filename, filedate, _):
 
     if ctx.triggered[0]["prop_id"] == "button-skip.n_clicks":
         dataframe = pd.read_csv(
-            Path(r"./example_dataset.csv"), index_col=0, parse_dates=True
+            Path(r"./example_1Y7S.csv"), index_col=0, parse_dates=True
         )
         filename = None
         filedate = None
@@ -169,7 +172,12 @@ def callback_download_table(_, table_data, table_columns):
 
 
 @app.callback(
-    Output("tab-analyze", "children"),
+    [
+        Output("tab-analysis", "children"),
+        Output("button-viz-analysis", "disabled"),
+        Output("button-viz-analysis", "outline"),
+        Output("row-button-download-analysis-csv", "style"),
+    ],
     Input("button-analyze", "n_clicks"),
     State("output-table", "derived_virtual_data"),
     State("output-table", "columns"),
@@ -177,26 +185,50 @@ def callback_download_table(_, table_data, table_columns):
 )
 def callback_analyze(_, table_data, table_columns):
     global SUMMARY_ALL
-    dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
 
-    SUMMARY_ALL = pyfunc.generate_summary_all(dataframe, n_days=["16D", "MS", "YS"])
-    tables = [
-        pylayoutfunc.create_table_summary(
-            summary, f"table-analyze-{counter}", deletable=False
-        )
-        for counter, summary in enumerate(SUMMARY_ALL)
+    button_viz_analysis_disabled = True
+    button_viz_analysis_outline = True
+    row_button_download_analysis_style = {"visibility": "hidden"}
+
+    try:
+        dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
+        SUMMARY_ALL = pyfunc.generate_summary_all(dataframe, n_days=["16D", "MS", "YS"])
+        tables = [
+            pylayoutfunc.create_table_summary(
+                summary, f"table-analyze-{counter}", deletable=False
+            )
+            for counter, summary in enumerate(SUMMARY_ALL)
+        ]
+
+        children = pylayoutfunc.create_tabcard_table_layout(tables)
+        button_viz_analysis_disabled = False
+        button_viz_analysis_outline = False
+        row_button_download_analysis_style = {"visibility": "visible"}
+    except Exception as e:
+        children = html.Div(f"SOMETHING ERROR {e}")
+
+    return [
+        children,
+        button_viz_analysis_disabled,
+        button_viz_analysis_outline,
+        row_button_download_analysis_style,
     ]
-
-    children = pylayoutfunc.create_tabcard_table_layout(tables)
-
-    return [children, html.Div("HELLO")]
 
 
 @app.callback(
-    Output("row-troubleshoot", "children"),
-    Input("button-troubleshoot", "n_clicks"),
-    # State("table-analyze-0", "derived_virtual_data"),
-    # State("table-analyze-0", "columns"),
+    Output("download-analysis-csv", "data"),
+    Input("button-download-analysis-csv", "n_clicks"),
+    prevent_initial_call=True,
+)
+def callback_download_results(_):
+
+    dataframe = pd.concat(SUMMARY_ALL, axis=1, keys=["Biweekly", "Monthly", "Yearly"])
+    return dcc.send_data_frame(dataframe.to_csv, "results.csv")
+
+
+@app.callback(
+    Output("tab-graph-analysis", "children"),
+    Input("button-viz-analysis", "n_clicks"),
     prevent_initial_call=True,
 )
 def callback_troubleshoot(_):
@@ -228,6 +260,15 @@ def callback_troubleshoot(_):
     children = pylayoutfunc.create_tabcard_graph_layout(all_graphs, labels)
 
     return children
+
+
+@app.callback(
+    Output("row-troubleshoot", "children"),
+    Input("button-troubleshoot", "n_clicks"),
+    prevent_initial_call=True,
+)
+def _callback_troubleshoot(_):
+    return html.Div("troubleshoot")
 
 
 if __name__ == "__main__":

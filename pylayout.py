@@ -4,6 +4,7 @@ from pyconfig import appConfig
 import plotly.io as pio
 from pytemplate import hktemplate
 import pyfigure
+import pylayoutfunc
 
 pio.templates.default = hktemplate
 
@@ -33,22 +34,29 @@ HTML_SUBTITLE = html.P(
 
 ALERT_CONTRIBUTION = dbc.Alert(
     [
-        "Tertarik untuk berkontribusi atau ikut bergabung untuk proyek seperti ini? Hubungi saya di ",
+        "Tertarik untuk berkontribusi? Ingin terlibat proyek hidrokit seperti ini? hubungi saya di ",
         html.A("hi@taruma.info", href="mailto:hi@taruma.info", className="text-bold"),
-        ". Atau kunjungi langsung repository proyek ini di ",
+        ". Langsung buat isu di ",
         html.A("Github", href=appConfig.GITHUB_LINK),
-        ".",
+        " jika memiliki pertanyaan/komentar/kritik/saran atau menemui kesalahan di proyek ini.",
     ]
 )
 
-HTML_ALERT = html.Div(
-    dbc.Container(
-        dbc.Row([dbc.Col(ALERT_CONTRIBUTION, width="auto")], justify="center"),
-        fluid=True,
-    ),
-    className="my-2",
+HTML_ALERT_CONTRIBUTION = pylayoutfunc.create_HTML_alert(ALERT_CONTRIBUTION)
+
+ALERT_README = dbc.Alert(
+    [
+        "Untuk petunjuk penggunaan bisa baca ",
+        html.A(
+            "README di github",
+            href="https://github.com/taruma/dash-hidrokit-rainfall#readme",
+        ),
+        ".",
+    ],
+    color="warning",
 )
 
+HTML_ALERT_README = pylayoutfunc.create_HTML_alert(ALERT_README, className="")
 
 DCC_UPLOAD = html.Div(
     dcc.Upload(
@@ -135,7 +143,7 @@ HTML_ROW_BUTTON_VIZ = html.Div(
                     dbc.Col(
                         [
                             dbc.Button(
-                                "Download Table As CSV",
+                                "Download Table as CSV",
                                 color="primary",
                                 className="fs-4",
                                 id="button-download-csv",
@@ -223,11 +231,9 @@ HTML_ROW_BUTTON_ANALYZE = html.Div(
                     )
                 ],
                 justify="center",
-                # class_name="m-4",
             )
         ],
         fluid=True,
-        id="row-download",
         class_name="my-5",
     )
 )
@@ -239,11 +245,68 @@ HTML_ROW_TABLE_ANALYZE = html.Div(
                 figure=pyfigure.figure_empty(),
                 config={"staticPlot": True},
             ),
-            id="tab-analyze",
+            id="tab-analysis",
         ),
         fluid=True,
     )
 )
+
+HTML_ROW_BUTTON_VIZ_ANALYSIS = html.Div(
+    dbc.Container(
+        [
+            dbc.Row(
+                [
+                    dbc.Col(
+                        [
+                            dbc.Button(
+                                [
+                                    "Visualize it!",
+                                ],
+                                color="danger",
+                                className="me-1 fs-4",
+                                outline=True,
+                                id="button-viz-analysis",
+                                disabled=True,
+                            ),
+                        ],
+                        width="auto",
+                    ),
+                    dbc.Col(
+                        [
+                            dbc.Button(
+                                "Download Results as CSV",
+                                color="primary",
+                                className="fs-4",
+                                id="button-download-analysis-csv",
+                            ),
+                            dcc.Download(id="download-analysis-csv"),
+                        ],
+                        width="auto",
+                        style={"visibility": "hidden"},
+                        id="row-button-download-analysis-csv",
+                    ),
+                ],
+                justify="center",
+            )
+        ],
+        fluid=True,
+        class_name="my-5",
+    )
+)
+
+HTML_ROW_GRAPH_ANALYSIS = html.Div(
+    dbc.Container(
+        dcc.Loading(
+            children=dcc.Graph(
+                figure=pyfigure.figure_empty(),
+                config={"staticPlot": True},
+            ),
+            id="tab-graph-analysis",
+        ),
+        fluid=True,
+    )
+)
+
 
 _HTML_TROUBLESHOOT = html.Div(
     dbc.Container(
@@ -256,10 +319,25 @@ _HTML_TROUBLESHOOT = html.Div(
     )
 )
 
+HTML_OTHER_PROJECTS = html.Div(
+    [
+        html.Span("other dashboard:"),
+        html.A(
+            [
+                html.Del("BMKG", style={"text-decoration-style": "double"}),
+                " 🛖 Explorer",
+            ],
+            href="https://github.com/taruma/dash-data-explorer",
+            style={"text-decoration": "none"},
+        ),
+    ],
+    className="d-flex gap-2 justify-content-center my-2",
+)
+
 HTML_MADEBY = html.Div(
     dcc.Markdown(
         "Made with [Dash+Plotly](https://plotly.com).",
-        className="fs-4 text-center mt-5",
+        className="fs-4 text-center mt-2",
     ),
 )
 
