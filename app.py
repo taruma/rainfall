@@ -21,9 +21,6 @@ dbc_css = (
     "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.4/dbc.min.css"
 )
 
-# GLOBAL VARS
-SUMMARY_ALL = None
-
 # APP
 app = dash.Dash(
     APP_TITLE,
@@ -184,7 +181,6 @@ def callback_download_table(_, table_data, table_columns):
     prevent_initial_call=True,
 )
 def callback_analyze(_, table_data, table_columns):
-    global SUMMARY_ALL
 
     button_viz_analysis_disabled = True
     button_viz_analysis_outline = True
@@ -192,12 +188,12 @@ def callback_analyze(_, table_data, table_columns):
 
     try:
         dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
-        SUMMARY_ALL = pyfunc.generate_summary_all(dataframe, n_days=["16D", "MS", "YS"])
+        summary_all = pyfunc.generate_summary_all(dataframe, n_days=["16D", "MS", "YS"])
         tables = [
             pylayoutfunc.create_table_summary(
                 summary, f"table-analyze-{counter}", deletable=False
             )
-            for counter, summary in enumerate(SUMMARY_ALL)
+            for counter, summary in enumerate(summary_all)
         ]
 
         children = pylayoutfunc.create_tabcard_table_layout(tables)
@@ -222,7 +218,11 @@ def callback_analyze(_, table_data, table_columns):
 )
 def callback_download_results(_):
 
-    dataframe = pd.concat(SUMMARY_ALL, axis=1, keys=["Biweekly", "Monthly", "Yearly"])
+    # TODO: FIX GLOBAL VARIABLE SUMMARY ALL
+    
+    summary_all = ...
+
+    dataframe = pd.concat(summary_all, axis=1, keys=["Biweekly", "Monthly", "Yearly"])
     return dcc.send_data_frame(dataframe.to_csv, "results.csv")
 
 
@@ -231,7 +231,7 @@ def callback_download_results(_):
     Input("button-viz-analysis", "n_clicks"),
     prevent_initial_call=True,
 )
-def callback_troubleshoot(_):
+def callback_graph_analysis(_):
     from itertools import product
 
     label_periods = ["Biweekly", "Monthly", "Yearly"]
@@ -239,6 +239,10 @@ def callback_troubleshoot(_):
     label_raindry = ["Dry + Rain"]
     label_ufunc = label_maxsum + label_raindry
 
+    # TODO: FIX GLOBAL VARIABLE SUMMARY_ALL
+    
+    summary_all = ...
+    
     graphs_maxsum = [
         pyfigure.figure_summary_maxsum(
             summary,
@@ -246,15 +250,15 @@ def callback_troubleshoot(_):
             period=period,
             subplot_titles=["Max", "Sum"],
         )
-        for summary, title, period in zip(SUMMARY_ALL, label_maxsum * 3, label_periods)
+        for summary, title, period in zip(summary_all, label_maxsum * 3, label_periods)
     ]
     graphs_raindry = [
         pyfigure.figure_summary_raindry(
             summary, title=f"<b>{period}: {title}</b>", period=period
         )
-        for summary, title, period in zip(SUMMARY_ALL, label_raindry * 3, label_periods)
+        for summary, title, period in zip(summary_all, label_raindry * 3, label_periods)
     ]
-    graph_maxdate = [pyfigure.figure_summary_maxdate(SUMMARY_ALL)]
+    graph_maxdate = [pyfigure.figure_summary_maxdate(summary_all)]
 
     all_graphs = graphs_maxsum + graphs_raindry + graph_maxdate
     labels = [": ".join(i) for i in product(label_ufunc, label_periods)]
