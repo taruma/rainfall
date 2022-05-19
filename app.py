@@ -319,7 +319,7 @@ def callback_graph_analysis(
     labels = [": ".join(i) for i in product(label_ufunc, label_periods)]
     labels += ["Maximum Rainfall Events"]
 
-    children = pylayoutfunc.create_tabcard_graph_layout(all_graphs, labels)
+    children = pylayoutfunc.create_tabcard_graph_layout(all_graphs, labels, active_tab='Maximum Rainfall Events')
 
     return children
 
