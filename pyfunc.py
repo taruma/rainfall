@@ -91,14 +91,14 @@ def transform_to_dataframe(
     parse_dates: list = None,
 ):
 
-    dataframe = pd.DataFrame(table_data)
-
     if multiindex is True:
+        dataframe = pd.DataFrame(table_data)
         dataframe.columns = pd.MultiIndex.from_tuples(
             [item["name"] for item in table_columns]
         )
     else:
-        dataframe.columns = [item["name"] for item in table_columns]
+        columns = pd.Index([item["name"] for item in table_columns])
+        dataframe = pd.DataFrame(table_data, columns=columns)
 
     dataframe["DATE"] = pd.to_datetime(dataframe.DATE)
     dataframe = dataframe.set_index("DATE").sort_index()
