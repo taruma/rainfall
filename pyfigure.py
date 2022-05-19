@@ -129,7 +129,9 @@ def figure_summary_maxsum(
     ufunc_cols = ["max", "sum"] if ufunc_cols is None else ufunc_cols
     subplot_titles = ufunc_cols if subplot_titles is None else subplot_titles
 
-    if (summary.size > THRESHOLD_SUMMARY) or (summary.index.size > THRESHOLD_XAXES):
+    if (
+        (summary.size > THRESHOLD_SUMMARY) or (summary.index.size > THRESHOLD_XAXES)
+    ) and (period.lower() != "yearly"):
         return dcc.Graph(
             figure=figure_empty("dataset above threshold"), config={"staticPlot": True}
         )
@@ -244,7 +246,9 @@ def figure_summary_raindry(
         summary.columns.levels[0] if subplot_titles is None else subplot_titles
     )
 
-    if (summary.size > THRESHOLD_SUMMARY) or (summary.index.size > THRESHOLD_XAXES):
+    if (
+        (summary.size > THRESHOLD_SUMMARY) or (summary.index.size > THRESHOLD_XAXES)
+    ) and (period.lower() != "yearly"):
         return dcc.Graph(
             figure=figure_empty("dataset above threshold"), config={"staticPlot": True}
         )
@@ -375,11 +379,6 @@ def figure_summary_maxdate(
     bubble_sizes: list[int] = None,
 ):
 
-    if summary_all[0].size > THRESHOLD_SUMMARY:
-        return dcc.Graph(
-            figure=figure_empty("dataset above threshold"), config={"staticPlot": True}
-        )
-
     ufunc_col = ["max_date"] if ufunc_col is None else ufunc_col
     subplot_titles = (
         ["Biweekly", "Monthly", "Yearly"] if subplot_titles is None else subplot_titles
@@ -411,7 +410,7 @@ def figure_summary_maxdate(
 
     all_df = pd.concat(all_stat, axis=1)
 
-    bubble_sizes = [8, 9, 10] if bubble_sizes is None else bubble_sizes
+    bubble_sizes = [10, 10, 10] if bubble_sizes is None else bubble_sizes
 
     data_dict = defaultdict(list)
     for period, bubble_size in zip(all_df.columns.levels[0], bubble_sizes):
@@ -424,6 +423,7 @@ def figure_summary_maxdate(
                 mode="markers",
                 marker_size=series.fillna(0),
                 marker_sizeref=sizeref,
+                marker_line_width=0,
                 legendgroup=station,
                 legendgrouptitle_text=station,
                 name=f"{period}",
