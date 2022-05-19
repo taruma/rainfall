@@ -6,7 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pytemplate
 import pandas as pd
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from itertools import cycle, islice
 
 THRESHOLD_SUMMARY = (367 * 8) // 2
@@ -145,8 +145,9 @@ def figure_summary_maxsum(
     fig.layout.images = [_generate_dict_watermark(n) for n in range(2, rows + 1)]
 
     data_dict = defaultdict(list)
-
-    for station in summary.columns.levels[0]:
+    stations = [station_name for station_name, _ in summary.columns.to_list()]
+    stations = list(OrderedDict.fromkeys(stations))
+    for station in stations:
         for ufcol, series in summary[station].items():
             if ufcol in ufunc_cols:
                 _bar = go.Bar(
@@ -268,8 +269,9 @@ def figure_summary_raindry(
         )
 
     data_dict = defaultdict(list)
-
-    for station in summary.columns.levels[0]:
+    stations = [station_name for station_name, _ in summary.columns.to_list()]
+    stations = list(OrderedDict.fromkeys(stations))
+    for station in stations:
         for ufcol, series in summary[station].items():
             if ufcol in ufunc_cols + ["n_left"]:
                 if ufcol in ufunc_cols:
@@ -398,7 +400,9 @@ def figure_summary_maxdate(
 
     all_stat = []
     for summary, period in zip(summary_all, periods):
-        for station in summary.columns.levels[0]:
+        stations = [station_name for station_name, _ in summary.columns.to_list()]
+        stations = list(OrderedDict.fromkeys(stations))
+        for station in stations:
             _max = summary[station].dropna(subset=ufunc_col)
             _max["max_date"] = pd.to_datetime(_max["max_date"])
             _max = _max.set_index("max_date")[["max"]]
