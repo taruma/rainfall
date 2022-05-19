@@ -214,24 +214,67 @@ def callback_analyze(_, table_data, table_columns):
 @app.callback(
     Output("download-analysis-csv", "data"),
     Input("button-download-analysis-csv", "n_clicks"),
+    State("table-analyze-0", "data"),
+    State("table-analyze-0", "columns"),
+    State("table-analyze-1", "data"),
+    State("table-analyze-1", "columns"),
+    State("table-analyze-2", "data"),
+    State("table-analyze-2", "columns"),
     prevent_initial_call=True,
 )
-def callback_download_results(_):
+def callback_download_results(
+    _,
+    biweekly_data,
+    biweekly_columns,
+    monthly_data,
+    monthly_columns,
+    yearly_data,
+    yearly_columns,
+):
 
-    # TODO: FIX GLOBAL VARIABLE SUMMARY ALL
-    
-    summary_all = ...
+    biweekly = (biweekly_data, biweekly_columns)
+    monthly = (monthly_data, monthly_columns)
+    yearly = (yearly_data, yearly_columns)
 
-    dataframe = pd.concat(summary_all, axis=1, keys=["Biweekly", "Monthly", "Yearly"])
-    return dcc.send_data_frame(dataframe.to_csv, "results.csv")
+    summary_all = []
+    for period in (biweekly, monthly, yearly):
+        data, columns = period
+        dataframe = pyfunc.transform_to_dataframe(
+            data,
+            columns,
+            multiindex=True,
+            apply_numeric=False,
+            parse_dates=["max_date"],
+        )
+        summary_all.append(dataframe)
+
+    dataframe_all = pd.concat(
+        summary_all, axis=1, keys=["Biweekly", "Monthly", "Yearly"]
+    )
+
+    return dcc.send_data_frame(dataframe_all.to_csv, "results.csv")
 
 
 @app.callback(
     Output("tab-graph-analysis", "children"),
     Input("button-viz-analysis", "n_clicks"),
+    State("table-analyze-0", "data"),
+    State("table-analyze-0", "columns"),
+    State("table-analyze-1", "data"),
+    State("table-analyze-1", "columns"),
+    State("table-analyze-2", "data"),
+    State("table-analyze-2", "columns"),
     prevent_initial_call=True,
 )
-def callback_graph_analysis(_):
+def callback_graph_analysis(
+    _,
+    biweekly_data,
+    biweekly_columns,
+    monthly_data,
+    monthly_columns,
+    yearly_data,
+    yearly_columns,
+):
     from itertools import product
 
     label_periods = ["Biweekly", "Monthly", "Yearly"]
@@ -239,10 +282,22 @@ def callback_graph_analysis(_):
     label_raindry = ["Dry + Rain"]
     label_ufunc = label_maxsum + label_raindry
 
-    # TODO: FIX GLOBAL VARIABLE SUMMARY_ALL
-    
-    summary_all = ...
-    
+    biweekly = (biweekly_data, biweekly_columns)
+    monthly = (monthly_data, monthly_columns)
+    yearly = (yearly_data, yearly_columns)
+
+    summary_all = []
+    for summary_period in (biweekly, monthly, yearly):
+        data, columns = summary_period
+        dataframe = pyfunc.transform_to_dataframe(
+            data,
+            columns,
+            multiindex=True,
+            apply_numeric=False,
+            parse_dates=["max_date"],
+        )
+        summary_all.append(dataframe)
+
     graphs_maxsum = [
         pyfigure.figure_summary_maxsum(
             summary,
