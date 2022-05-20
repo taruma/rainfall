@@ -583,7 +583,7 @@ def figure_consistency(cumsum: pd.DataFrame, col: str) -> go.Figure:
     _scatter.marker.symbol = "circle"
     _scatter.name = col
     _scatter.hovertemplate = (
-        f"{col}<br><b>y: %{{y}} mm<br><i>x: %{{x}}</i></b><extra></extra>"
+        f"{col}<br><b>y: %{{y}} mm<br><i>x: %{{x}} mm</i></b><extra></extra>"
     )
 
     # MODIFIED TRENDLINE
