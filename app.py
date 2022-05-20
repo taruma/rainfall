@@ -21,9 +21,6 @@ dbc_css = (
     "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.4/dbc.min.css"
 )
 
-# GLOBAL VARS
-SUMMARY_ALL = None
-
 # APP
 app = dash.Dash(
     APP_TITLE,
@@ -42,6 +39,7 @@ app.layout = dbc.Container(
         pylayout.HTML_TITLE,
         pylayout.HTML_SUBTITLE,
         pylayout.HTML_ALERT_README,
+        pylayout.HTML_ALERT_SPONSOR,
         pylayout.HTML_ROW_BUTTON_UPLOAD,
         pylayout.HTML_ROW_TABLE,
         pylayout.HTML_ROW_BUTTON_VIZ,
@@ -51,6 +49,8 @@ app.layout = dbc.Container(
         pylayout.HTML_ROW_TABLE_ANALYZE,
         pylayout.HTML_ROW_BUTTON_VIZ_ANALYSIS,
         pylayout.HTML_ROW_GRAPH_ANALYSIS,
+        pylayout.HTML_ROW_GRAPH_CUMSUM,
+        pylayout.HTML_ROW_GRAPH_CONSISTENCY,
         pylayout.HTML_ALERT_CONTRIBUTION,
         pylayout.HTML_MADEBY,
         pylayout.HTML_OTHER_PROJECTS,
@@ -94,12 +94,13 @@ def callback_upload(content, filename, filedate, _):
     button_viz_outline = True
 
     if dataframe is not None:
+        editable = [False] + [True] * len(dataframe.columns)
         children = pylayoutfunc.create_table_layout(
             dataframe,
             "output-table",
             filename=filename,
             filedate=filedate,
-            editable=True,
+            editable=editable,
             renamable=True,
         )
         upload_disabled = False
@@ -184,7 +185,6 @@ def callback_download_table(_, table_data, table_columns):
     prevent_initial_call=True,
 )
 def callback_analyze(_, table_data, table_columns):
-    global SUMMARY_ALL
 
     button_viz_analysis_disabled = True
     button_viz_analysis_outline = True
@@ -192,15 +192,33 @@ def callback_analyze(_, table_data, table_columns):
 
     try:
         dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
-        SUMMARY_ALL = pyfunc.generate_summary_all(dataframe, n_days=["16D", "MS", "YS"])
-        tables = [
+
+        # SUMMARY
+        summary_all = pyfunc.generate_summary_all(dataframe, n_days=["16D", "MS", "YS"])
+        tables_summary = [
             pylayoutfunc.create_table_summary(
                 summary, f"table-analyze-{counter}", deletable=False
             )
-            for counter, summary in enumerate(SUMMARY_ALL)
+            for counter, summary in enumerate(summary_all)
         ]
 
-        children = pylayoutfunc.create_tabcard_table_layout(tables)
+        # CUMUMLATIVE SUM
+        cumsum = pyfunc.calc_cumsum(dataframe)
+
+        _, table_cumsum = pylayoutfunc.create_table_layout(
+            cumsum, "table-cumsum", deletable=False
+        )
+
+        table_cumsum = [table_cumsum]
+
+        # LAYOUT
+        tables_all = tables_summary + table_cumsum
+        tab_names = "Biweekly Monthly Yearly Cumulative".split()
+
+        children = pylayoutfunc.create_tabcard_table_layout(
+            tables_all, tab_names=tab_names
+        )
+
         button_viz_analysis_disabled = False
         button_viz_analysis_outline = False
         row_button_download_analysis_style = {"visibility": "visible"}
@@ -218,26 +236,105 @@ def callback_analyze(_, table_data, table_columns):
 @app.callback(
     Output("download-analysis-csv", "data"),
     Input("button-download-analysis-csv", "n_clicks"),
+    State("table-analyze-0", "data"),
+    State("table-analyze-0", "columns"),
+    State("table-analyze-1", "data"),
+    State("table-analyze-1", "columns"),
+    State("table-analyze-2", "data"),
+    State("table-analyze-2", "columns"),
+    State("table-cumsum", "data"),
+    State("table-cumsum", "columns"),
     prevent_initial_call=True,
 )
-def callback_download_results(_):
+def callback_download_results(
+    _,
+    biweekly_data,
+    biweekly_columns,
+    monthly_data,
+    monthly_columns,
+    yearly_data,
+    yearly_columns,
+    cumsum_data,
+    cumsum_columns,
+):
 
-    dataframe = pd.concat(SUMMARY_ALL, axis=1, keys=["Biweekly", "Monthly", "Yearly"])
-    return dcc.send_data_frame(dataframe.to_csv, "results.csv")
+    biweekly = (biweekly_data, biweekly_columns)
+    monthly = (monthly_data, monthly_columns)
+    yearly = (yearly_data, yearly_columns)
+
+    summary_all = []
+    for period in (biweekly, monthly, yearly):
+        data, columns = period
+        dataframe = pyfunc.transform_to_dataframe(
+            data,
+            columns,
+            multiindex=True,
+            apply_numeric=False,
+            parse_dates=["max_date"],
+        )
+        summary_all.append(dataframe)
+
+    cumsum = pyfunc.transform_to_dataframe(cumsum_data, cumsum_columns)
+    stations = cumsum.columns.to_list()
+    cumsum.columns = pd.MultiIndex.from_product([stations, [""]])
+
+    dataframe_all = pd.concat(
+        summary_all + [cumsum],
+        axis=1,
+        keys=["Biweekly", "Monthly", "Yearly", "Cumulative"],
+    )
+
+    return dcc.send_data_frame(dataframe_all.to_csv, "results.csv")
 
 
 @app.callback(
     Output("tab-graph-analysis", "children"),
+    Output("tab-graph-cumsum", "children"),
+    Output("tab-graph-consistency", "children"),
     Input("button-viz-analysis", "n_clicks"),
+    State("table-analyze-0", "data"),
+    State("table-analyze-0", "columns"),
+    State("table-analyze-1", "data"),
+    State("table-analyze-1", "columns"),
+    State("table-analyze-2", "data"),
+    State("table-analyze-2", "columns"),
+    State("table-cumsum", "data"),
+    State("table-cumsum", "columns"),
     prevent_initial_call=True,
 )
-def callback_troubleshoot(_):
+def callback_graph_analysis(
+    _,
+    biweekly_data,
+    biweekly_columns,
+    monthly_data,
+    monthly_columns,
+    yearly_data,
+    yearly_columns,
+    cumsum_data,
+    cumsum_columns,
+):
     from itertools import product
 
     label_periods = ["Biweekly", "Monthly", "Yearly"]
     label_maxsum = ["Max + Sum"]
     label_raindry = ["Dry + Rain"]
     label_ufunc = label_maxsum + label_raindry
+
+    biweekly = (biweekly_data, biweekly_columns)
+    monthly = (monthly_data, monthly_columns)
+    yearly = (yearly_data, yearly_columns)
+
+    summary_all = []
+    for summary_period in (biweekly, monthly, yearly):
+        data, columns = summary_period
+        dataframe = pyfunc.transform_to_dataframe(
+            data,
+            columns,
+            multiindex=True,
+            apply_numeric=False,
+            parse_dates=["max_date"],
+        )
+        summary_all.append(dataframe)
 
     graphs_maxsum = [
         pyfigure.figure_summary_maxsum(
@@ -246,23 +343,56 @@ def callback_troubleshoot(_):
             period=period,
             subplot_titles=["Max", "Sum"],
         )
-        for summary, title, period in zip(SUMMARY_ALL, label_maxsum * 3, label_periods)
+        for summary, title, period in zip(summary_all, label_maxsum * 3, label_periods)
     ]
     graphs_raindry = [
         pyfigure.figure_summary_raindry(
             summary, title=f"<b>{period}: {title}</b>", period=period
         )
-        for summary, title, period in zip(SUMMARY_ALL, label_raindry * 3, label_periods)
+        for summary, title, period in zip(summary_all, label_raindry * 3, label_periods)
     ]
-    graph_maxdate = [pyfigure.figure_summary_maxdate(SUMMARY_ALL)]
+    graph_maxdate = [pyfigure.figure_summary_maxdate(summary_all)]
 
     all_graphs = graphs_maxsum + graphs_raindry + graph_maxdate
     labels = [": ".join(i) for i in product(label_ufunc, label_periods)]
     labels += ["Maximum Rainfall Events"]
 
-    children = pylayoutfunc.create_tabcard_graph_layout(all_graphs, labels)
+    children_analysis = pylayoutfunc.create_tabcard_graph_layout(
+        all_graphs, labels, active_tab="Maximum Rainfall Events"
+    )
 
-    return children
+    # CUMSUM
+
+    cumsum = pyfunc.transform_to_dataframe(cumsum_data, cumsum_columns)
+
+    graph_cumsum = [
+        pyfigure.figure_cumsum_single(cumsum, col=station) for station in cumsum.columns
+    ]
+
+    children_cumsum = pylayoutfunc.create_tabcard_graph_layout(
+        graph_cumsum, cumsum.columns
+    )
+
+    # CONSISTENCY
+
+    if cumsum.columns.size == 1:
+        children_consistency = (
+            dcc.Graph(
+                figure=pyfigure.figure_empty(text="Not Available for Single Station"),
+                config={"staticPlot": True},
+            ),
+        )
+    else:
+        graph_consistency = [
+            pyfigure.figure_consistency(cumsum, col=station)
+            for station in cumsum.columns
+        ]
+
+        children_consistency = pylayoutfunc.create_tabcard_graph_layout(
+            graph_consistency, cumsum.columns
+        )
+
+    return children_analysis, children_cumsum, children_consistency
 
 
 @app.callback(

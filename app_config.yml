@@ -4,7 +4,7 @@ DASH_APP:
   DEBUG: False
 
 DASH_THEME:
-  THEME: SIMPLEX
+  THEME: COSMO
 
 TEMPLATE:
   LOGO_SOURCE: https://raw.githubusercontent.com/hidrokit/static-assets/main/logo_0.4.0-v1.1/hidrokit-hidrokit/50x50square.png
@@ -12,6 +12,6 @@ TEMPLATE:
   SHOW_LEGEND_INSIDE: False
   SHOW_RANGESELECTOR: False
 
-VERSION: v1.0.0
+VERSION: v1.1.0
 GITHUB_LINK: https://github.com/taruma/dash-hidrokit-rainfall
 GITHUB_REPO: taruma/dash-hidrokit-rainfall

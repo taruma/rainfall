@@ -6,7 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pytemplate
 import pandas as pd
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from itertools import cycle, islice
 
 THRESHOLD_SUMMARY = (367 * 8) // 2
@@ -129,7 +129,9 @@ def figure_summary_maxsum(
     ufunc_cols = ["max", "sum"] if ufunc_cols is None else ufunc_cols
     subplot_titles = ufunc_cols if subplot_titles is None else subplot_titles
 
-    if (summary.size > THRESHOLD_SUMMARY) or (summary.index.size > THRESHOLD_XAXES):
+    if (
+        (summary.size > THRESHOLD_SUMMARY) or (summary.index.size > THRESHOLD_XAXES)
+    ) and (period.lower() != "yearly"):
         return dcc.Graph(
             figure=figure_empty("dataset above threshold"), config={"staticPlot": True}
         )
@@ -145,8 +147,9 @@ def figure_summary_maxsum(
     fig.layout.images = [_generate_dict_watermark(n) for n in range(2, rows + 1)]
 
     data_dict = defaultdict(list)
-
-    for station in summary.columns.levels[0]:
+    stations = [station_name for station_name, _ in summary.columns.to_list()]
+    stations = list(OrderedDict.fromkeys(stations))
+    for station in stations:
         for ufcol, series in summary[station].items():
             if ufcol in ufunc_cols:
                 _bar = go.Bar(
@@ -243,7 +246,9 @@ def figure_summary_raindry(
         summary.columns.levels[0] if subplot_titles is None else subplot_titles
     )
 
-    if (summary.size > THRESHOLD_SUMMARY) or (summary.index.size > THRESHOLD_XAXES):
+    if (
+        (summary.size > THRESHOLD_SUMMARY) or (summary.index.size > THRESHOLD_XAXES)
+    ) and (period.lower() != "yearly"):
         return dcc.Graph(
             figure=figure_empty("dataset above threshold"), config={"staticPlot": True}
         )
@@ -268,8 +273,9 @@ def figure_summary_raindry(
         )
 
     data_dict = defaultdict(list)
-
-    for station in summary.columns.levels[0]:
+    stations = [station_name for station_name, _ in summary.columns.to_list()]
+    stations = list(OrderedDict.fromkeys(stations))
+    for station in stations:
         for ufcol, series in summary[station].items():
             if ufcol in ufunc_cols + ["n_left"]:
                 if ufcol in ufunc_cols:
@@ -373,11 +379,6 @@ def figure_summary_maxdate(
     bubble_sizes: list[int] = None,
 ):
 
-    if summary_all[0].size > THRESHOLD_SUMMARY:
-        return dcc.Graph(
-            figure=figure_empty("dataset above threshold"), config={"staticPlot": True}
-        )
-
     ufunc_col = ["max_date"] if ufunc_col is None else ufunc_col
     subplot_titles = (
         ["Biweekly", "Monthly", "Yearly"] if subplot_titles is None else subplot_titles
@@ -398,7 +399,9 @@ def figure_summary_maxdate(
 
     all_stat = []
     for summary, period in zip(summary_all, periods):
-        for station in summary.columns.levels[0]:
+        stations = [station_name for station_name, _ in summary.columns.to_list()]
+        stations = list(OrderedDict.fromkeys(stations))
+        for station in stations:
             _max = summary[station].dropna(subset=ufunc_col)
             _max["max_date"] = pd.to_datetime(_max["max_date"])
             _max = _max.set_index("max_date")[["max"]]
@@ -407,7 +410,7 @@ def figure_summary_maxdate(
 
     all_df = pd.concat(all_stat, axis=1)
 
-    bubble_sizes = [8, 9, 10] if bubble_sizes is None else bubble_sizes
+    bubble_sizes = [10, 10, 10] if bubble_sizes is None else bubble_sizes
 
     data_dict = defaultdict(list)
     for period, bubble_size in zip(all_df.columns.levels[0], bubble_sizes):
@@ -420,6 +423,7 @@ def figure_summary_maxdate(
                 mode="markers",
                 marker_size=series.fillna(0),
                 marker_sizeref=sizeref,
+                marker_line_width=0,
                 legendgroup=station,
                 legendgrouptitle_text=station,
                 name=f"{period}",
@@ -487,5 +491,128 @@ def figure_summary_maxdate(
 
     for data, color in zip(fig.data, colors * 3):
         data.marker.color = color
+
+    return dcc.Graph(figure=fig)
+
+
+def figure_cumsum_single(cumsum: pd.DataFrame, col: str = None) -> go.Figure:
+    import re
+
+    col = cumsum.columns[0] if col is None else col
+
+    new_dataframe = cumsum.copy()
+    new_dataframe["number"] = np.arange(1, len(new_dataframe) + 1)
+
+    fig = px.scatter(
+        x=new_dataframe.number,
+        y=new_dataframe[col],
+        trendline="ols",
+        trendline_color_override=pytemplate.hktemplate.layout.colorway[1],
+    )
+
+    # MODIFIED SCATTER
+
+    _scatter = fig.data[0]
+    _scatter.mode = "markers+lines"
+    _scatter.line.dash = "dashdot"
+    _scatter.line.width = 1
+    _scatter.marker.size = 12
+    _scatter.marker.symbol = "circle"
+    _scatter.name = col
+    _scatter.hovertemplate = (
+        f"{col}<br><b>%{{y}} mm</b><br><i>%{{x}}</i><extra></extra>"
+    )
+
+    # MODIFIED TRENDLINE
+
+    _trendline = fig.data[1]
+    _oldhovertemplate = _trendline.hovertemplate
+
+    if _oldhovertemplate != "<extra></extra>":
+        re_pattern = re.compile("<br>(.+)<br>R.+=([0-9.]+)<br>")
+        equation, r2 = re_pattern.findall(_oldhovertemplate)[0]
+        _newtemplate = (
+            "<b>OLS trendline</b><br>"
+            + f"<i>{equation}</i><br>"
+            + f"<i>R<sup>2</sup>: {r2}</i><br>"
+            + "<b>%{y} mm</b> (trend)<br>"
+            + "<i>%{x}</i>"
+            + "<extra></extra>"
+        )
+        _trendline.hovertemplate = _newtemplate
+
+    _trendline.showlegend = True
+    _trendline.name = "trendline"
+
+    fig.update_layout(
+        xaxis_title="<b>Date</b>",
+        yaxis_title="<b>Cumulative Annual (mm)</b>",
+        margin=dict(l=0, t=35, b=0, r=0),
+        xaxis_tickvals=new_dataframe.number,
+        xaxis_ticktext=new_dataframe.index.year,
+        yaxis_tickformat=".0f",
+    )
+
+    return dcc.Graph(figure=fig)
+
+
+def figure_consistency(cumsum: pd.DataFrame, col: str) -> go.Figure:
+    import re
+
+    cumsum = cumsum.copy()
+
+    # Create Mean Cumulative Other Stations
+    cumsum_y = cumsum[col]
+    other_stations = cumsum.columns.drop(col)
+    cumsum_x = cumsum[other_stations].mean(axis=1).cumsum()
+
+    fig = px.scatter(
+        x=cumsum_x,
+        y=cumsum_y,
+        trendline="ols",
+        trendline_color_override=pytemplate.hktemplate.layout.colorway[1],
+    )
+
+    # MODIFIED SCATTER
+
+    _scatter = fig.data[0]
+    _scatter.mode = "markers+lines"
+    _scatter.line.dash = "dashdot"
+    _scatter.line.width = 1
+    _scatter.marker.size = 12
+    _scatter.marker.symbol = "circle"
+    _scatter.name = col
+    _scatter.hovertemplate = (
+        f"{col}<br><b>y: %{{y}} mm<br><i>x: %{{x}} mm</i></b><extra></extra>"
+    )
+
+    # MODIFIED TRENDLINE
+
+    _trendline = fig.data[1]
+    _oldhovertemplate = _trendline.hovertemplate
+
+    if _oldhovertemplate != "<extra></extra>":
+        re_pattern = re.compile("<br>(.+)<br>R.+=([0-9.]+)<br>")
+        equation, r2 = re_pattern.findall(_oldhovertemplate)[0]
+        _newtemplate = (
+            "<b>OLS trendline</b><br>"
+            + f"<i>{equation}</i><br>"
+            + f"<i>R<sup>2</sup>: {r2}</i><br>"
+            + "<b>%{y} mm</b> (trend)<br>"
+            + "<i>%{x} mm</i>"
+            + "<extra></extra>"
+        )
+        _trendline.hovertemplate = _newtemplate
+
+    _trendline.showlegend = True
+    _trendline.name = "trendline"
+
+    fig.update_layout(
+        xaxis_title="<b>Cumulative Average Annual Other Stations (mm)</b>",
+        yaxis_title=f"<b>Cumulative Average Annual (mm)</b>",
+        margin=dict(l=0, t=35, b=0, r=0),
+        yaxis_tickformat=".0f",
+        xaxis_tickformat=".0f",
+    )
 
     return dcc.Graph(figure=fig)

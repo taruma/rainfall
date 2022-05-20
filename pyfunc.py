@@ -58,7 +58,7 @@ def generate_summary_single(dataframe, n_days="1MS"):
         if vector.any():
             return vector.idxmax().date()
         else:
-            return np.nan
+            return pd.NaT
 
     def max(vector):
         return vector.max()
@@ -70,7 +70,7 @@ def generate_summary_single(dataframe, n_days="1MS"):
         dataframe, ufunc=ufunc, ufunc_col=ufunc_col, n_days=n_days
     )
 
-    return summary
+    return summary.infer_objects()
 
 
 def generate_summary_all(dataframe, n_days: list = None):
@@ -84,23 +84,57 @@ def generate_summary_all(dataframe, n_days: list = None):
 
 
 def transform_to_dataframe(
-    table_data, table_columns, multiindex: bool = False, apply_numeric: bool = True
+    table_data,
+    table_columns,
+    multiindex: bool = False,
+    apply_numeric: bool = True,
+    parse_dates: list = None,
 ):
 
-    dataframe = pd.DataFrame(table_data)
     if multiindex is True:
+        dataframe = pd.DataFrame(table_data)
         dataframe.columns = pd.MultiIndex.from_tuples(
             [item["name"] for item in table_columns]
         )
     else:
-        dataframe.columns = [item["name"] for item in table_columns]
+        columns = pd.Index([item["name"] for item in table_columns])
+        dataframe = pd.DataFrame(table_data, columns=columns)
 
     dataframe["DATE"] = pd.to_datetime(dataframe.DATE)
     dataframe = dataframe.set_index("DATE").sort_index()
+
+    if multiindex is True:
+        # removing date (index.name) from top level multiindex
+        dataframe.columns = pd.MultiIndex.from_tuples(dataframe.columns.to_flat_index())
 
     if apply_numeric is True:
         dataframe = dataframe.apply(pd.to_numeric, errors="coerce")
     else:
         dataframe = dataframe.infer_objects()
 
+    if parse_dates is not None:
+        if multiindex:
+            for col_dates in parse_dates:
+                col_parsing = [
+                    col_tuple
+                    for col_tuple in dataframe.columns
+                    if col_dates in col_tuple
+                ]
+                for col_dates in col_parsing:
+                    dataframe[col_dates] = pd.to_datetime(
+                        dataframe[col_dates], errors="coerce"
+                    )
+        else:
+            for col_dates in parse_dates:
+                dataframe[col_dates] = pd.to_datetime(
+                    dataframe[col_dates], errors="coerce"
+                )
+
     return dataframe
+
+
+def calc_cumsum(dataframe):
+
+    consistency = dataframe.resample("YS").sum().cumsum()
+
+    return consistency.round()

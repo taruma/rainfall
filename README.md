@@ -1,8 +1,8 @@
-# Dashboard Rainfall Data Explorer
+# hidrokit Rainfall Data Explorer (hidrokit-RDE)
 
-![image](https://user-images.githubusercontent.com/1007910/167613715-7b3db12e-47e5-4d43-8765-19ac3551ed46.png)
+![image](https://user-images.githubusercontent.com/1007910/169490220-d0b5a944-fa36-452b-b7e1-fcf5e04e415b.png)
 
-__Rainfall Data Explorer__ (`hkrainfall`) adalah _dashboard_ untuk mengeksplorasi data hujan di setiap stasiunnya dan membandingkannya baik secara numerik maupun visual. `hkrainfall` dibuat menggunakan teknologi [Dash + Plotly](https://plotly.com/) dengan bahasa pemrograman Python. Proyek `hkrainfall` bersifat _open-source_ dengan lisensi MIT.
+__Rainfall Data Explorer__ (`hkrainfall` / `hidrokit-RDE`) adalah _dashboard_ untuk mengeksplorasi data hujan di setiap stasiunnya dan membandingkannya baik secara numerik maupun visual. `hkrainfall` dibuat menggunakan teknologi [Dash + Plotly](https://plotly.com/) dengan bahasa pemrograman Python. Proyek `hkrainfall` bersifat _open-source_ dengan lisensi MIT.
 
 ## Cara Menjalankan Dashboard (Lokal)
 
@@ -29,6 +29,7 @@ Navigasi dashboard ini antara lain:
 - Setelah tabel sudah dikoreksi. Bisa dilanjutkan ke tahapan analisis data. Perlu diingat, data yang dianalisis sesuai dengan tampilan/informasi tabel terkini. Jadi, jika masih ada filter, maka analisis hanya dilakukan pada data yang telah terfilter.
 - Klik "Analyze Data" untuk melakukan analisis data. Perlu diingat, proses ini akan memakan waktu jika memiliki dataset yang besar. Jadi, sangat disarankan menggunakan mesin lokal untuk proses ini. Karena yang dapat diakses di web hanya berupa demonstrasi saja dan menggunakan layanan gratis sehingga sangat terbatas kemampuannya.
 - Analisis data terbagi menjadi tiga periode yaitu 2 periode (biweekly), setiap bulanan (monthly), dan tahunan (yearly). Sebagai catatan, biweekly itu dibagi berdasarkan 16 hari pertama kemudian sisa harinya pada setiap bulan.
+- __Baru di `v1.1.0`__: Analisis konsistensi (kurva massa ganda) dan kumulatif hujan tahunan. 
 - Analisis data yang dilakukan berupa:
     - `days`: Jumlah hari pada setiap periodenya (16 hari untuk biweekly, 1 bulan untuk monthly, dan 1 tahun untuk yearly).
     - `max`: Nilai maksimum pada setiap periode.
@@ -43,6 +44,7 @@ Navigasi dashboard ini antara lain:
     - Group Bar Chart untuk setiap periode dengan kolom `max` dan `sum`. Grafik ini bisa melihat secara langsung perbandingan nilai antar stasiun. 
     - Stack Bar Chart untuk setiap periode dengan kolom `n_rain` dan `n_dry`. Grafik ini bisa memberikan gambaran periode yang memiliki frekuensi hujan/kekeringan tinggi/rendah secara sekilas.
     - Bubble Chart (Maximum Rainfall Events) memberikan gambaran besar terkait tanggal kejadian saat hujan maksimum terjadi di setiap stasiun. Ukuran lingkaran menunjukkan seberapa besar hujan maksimum yang terjadi. 
+    - __Baru di `v1.1.0`__: Ditambahkan grafik kumulatif hujan tahunan dan konsistensi (kurva massa ganda) untuk setiap stasiun.
 
 Navigasi dengan grafik interaktif plotly:
 

@@ -10,21 +10,35 @@ def create_table_layout(
     idtable,
     filename=None,
     filedate=None,
-    editable=False,
+    editable: list | bool = False,
     deletable=True,
     renamable=False,
 ):
+    from collections.abc import Iterable
+
     new_dataframe = dataframe.rename_axis("DATE").reset_index()
     new_dataframe.DATE = new_dataframe.DATE.dt.date
+
+    editable = (
+        editable
+        if isinstance(editable, Iterable)
+        else [editable] * len(new_dataframe.columns)
+    )
+
     table = dash_table.DataTable(
         id=idtable,
         columns=[
-            {"name": i, "id": i, "deletable": deletable, "renamable": renamable}
-            for i in new_dataframe.columns
+            {
+                "name": i,
+                "id": i,
+                "deletable": deletable,
+                "renamable": renamable,
+                "editable": edit_col,
+            }
+            for i, edit_col in zip(new_dataframe.columns, editable)
         ],
         data=new_dataframe.to_dict("records"),
         page_size=20,
-        editable=editable,
         cell_selectable=True,
         filter_action="native",
         sort_action="native",
@@ -76,7 +90,10 @@ def create_table_summary(
 
 
 def create_tabcard_table_layout(
-    tables: list, tab_names: list = None, disabled: list = None
+    tables: list,
+    tab_names: list = None,
+    disabled: list = None,
+    active_tab: str = None,
 ):
 
     disabled = [False] * len(tables) if disabled is None else disabled
@@ -88,14 +105,20 @@ def create_tabcard_table_layout(
             dbc.Card(dbc.CardBody([table]), class_name="my-3"),
             label=tab_name,
             disabled=active,
+            tab_id=tab_name,
         )
         tab.append(_tab)
 
-    return dbc.Tabs(tab)
+    active_tab = tab_names[0] if active_tab is None else active_tab
+
+    return dbc.Tabs(tab, active_tab=active_tab)
 
 
 def create_tabcard_graph_layout(
-    graphs: list[dcc.Graph], tab_names: list = None, disabled: list = None
+    graphs: list[dcc.Graph],
+    tab_names: list = None,
+    disabled: list = None,
+    active_tab: str = None,
 ):
 
     disabled = [False] * len(graphs) if disabled is None else disabled
@@ -107,10 +130,13 @@ def create_tabcard_graph_layout(
             dbc.Card(dbc.CardBody([graph]), class_name="my-3"),
             label=tab_name,
             disabled=active,
+            tab_id=tab_name,
         )
         tab.append(_tab)
 
-    return dbc.Tabs(tab)
+    active_tab = tab_names[0] if active_tab is None else active_tab
+
+    return dbc.Tabs(tab, active_tab=active_tab)
 
 
 def create_HTML_alert(alert: dbc.Alert, className: str = "my-2"):
