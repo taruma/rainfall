@@ -324,13 +324,36 @@ HTML_ROW_GRAPH_ANALYSIS = html.Div(
             id="tab-graph-analysis",
         ),
         fluid=True,
-    )
+    ),
+    className="my-3",
+)
+
+HTML_ROW_GRAPH_CUMSUM = html.Div(
+    dbc.Container(
+        [
+            html.H3("Total Cumulative Annual", className="text-center"),
+            dbc.Row(
+                dbc.Col(
+                    dcc.Loading(
+                        children=dcc.Graph(
+                            figure=pyfigure.figure_empty(),
+                            config={"staticPlot": True},
+                        ),
+                        id="tab-graph-cumsum",
+                    ),
+                    width={"size": 6, "offset": 3},
+                ),
+            ),
+        ],
+        fluid=True,
+    ),
+    className="my-3",
 )
 
 HTML_ROW_GRAPH_CONSISTENCY = html.Div(
     dbc.Container(
         [
-            html.H3("Consistency", className="text-center"),
+            html.H3("Consistency (Double Mass Curve)", className="text-center"),
             dbc.Row(
                 dbc.Col(
                     dcc.Loading(
@@ -345,7 +368,8 @@ HTML_ROW_GRAPH_CONSISTENCY = html.Div(
             ),
         ],
         fluid=True,
-    )
+    ),
+    className="my-3",
 )
 
 _HTML_TROUBLESHOOT = html.Div(

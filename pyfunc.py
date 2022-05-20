@@ -133,7 +133,7 @@ def transform_to_dataframe(
     return dataframe
 
 
-def calc_consistency(dataframe):
+def calc_cumsum(dataframe):
 
     consistency = dataframe.resample("YS").sum().cumsum()
 

@@ -49,6 +49,7 @@ app.layout = dbc.Container(
         pylayout.HTML_ROW_TABLE_ANALYZE,
         pylayout.HTML_ROW_BUTTON_VIZ_ANALYSIS,
         pylayout.HTML_ROW_GRAPH_ANALYSIS,
+        pylayout.HTML_ROW_GRAPH_CUMSUM,
         pylayout.HTML_ROW_GRAPH_CONSISTENCY,
         pylayout.HTML_ALERT_CONTRIBUTION,
         pylayout.HTML_MADEBY,
@@ -201,18 +202,18 @@ def callback_analyze(_, table_data, table_columns):
             for counter, summary in enumerate(summary_all)
         ]
 
-        # CONSISTENCY
-        consistency = pyfunc.calc_consistency(dataframe)
+        # CUMUMLATIVE SUM
+        cumsum = pyfunc.calc_cumsum(dataframe)
 
-        _, tables_consistency = pylayoutfunc.create_table_layout(
-            consistency, "table-consistency", deletable=False
+        _, table_cumsum = pylayoutfunc.create_table_layout(
+            cumsum, "table-cumsum", deletable=False
         )
 
-        tables_consistency = [tables_consistency]
+        table_cumsum = [table_cumsum]
 
         # LAYOUT
-        tables_all = tables_summary + tables_consistency
-        tab_names = "Biweekly Monthly Yearly Consistency".split()
+        tables_all = tables_summary + table_cumsum
+        tab_names = "Biweekly Monthly Yearly Cumulative".split()
 
         children = pylayoutfunc.create_tabcard_table_layout(
             tables_all, tab_names=tab_names
@@ -241,8 +242,8 @@ def callback_analyze(_, table_data, table_columns):
     State("table-analyze-1", "columns"),
     State("table-analyze-2", "data"),
     State("table-analyze-2", "columns"),
-    State("table-consistency", "data"),
-    State("table-consistency", "columns"),
+    State("table-cumsum", "data"),
+    State("table-cumsum", "columns"),
     prevent_initial_call=True,
 )
 def callback_download_results(
@@ -253,8 +254,8 @@ def callback_download_results(
     monthly_columns,
     yearly_data,
     yearly_columns,
-    consistency_data,
-    consistency_columns,
+    cumsum_data,
+    cumsum_columns,
 ):
 
     biweekly = (biweekly_data, biweekly_columns)
@@ -273,14 +274,14 @@ def callback_download_results(
         )
         summary_all.append(dataframe)
 
-    consistency = pyfunc.transform_to_dataframe(consistency_data, consistency_columns)
-    stations = consistency.columns.to_list()
-    consistency.columns = pd.MultiIndex.from_product([stations, [""]])
+    cumsum = pyfunc.transform_to_dataframe(cumsum_data, cumsum_columns)
+    stations = cumsum.columns.to_list()
+    cumsum.columns = pd.MultiIndex.from_product([stations, [""]])
 
     dataframe_all = pd.concat(
-        summary_all + [consistency],
+        summary_all + [cumsum],
         axis=1,
-        keys=["Biweekly", "Monthly", "Yearly", "Consistency"],
+        keys=["Biweekly", "Monthly", "Yearly", "Cumulative"],
     )
 
     return dcc.send_data_frame(dataframe_all.to_csv, "results.csv")
@@ -288,6 +289,7 @@ def callback_download_results(
 
 @app.callback(
     Output("tab-graph-analysis", "children"),
+    Output("tab-graph-cumsum", "children"),
     Output("tab-graph-consistency", "children"),
     Input("button-viz-analysis", "n_clicks"),
     State("table-analyze-0", "data"),
@@ -296,8 +298,8 @@ def callback_download_results(
     State("table-analyze-1", "columns"),
     State("table-analyze-2", "data"),
     State("table-analyze-2", "columns"),
-    State("table-consistency", "data"),
-    State("table-consistency", "columns"),
+    State("table-cumsum", "data"),
+    State("table-cumsum", "columns"),
     prevent_initial_call=True,
 )
 def callback_graph_analysis(
@@ -308,8 +310,8 @@ def callback_graph_analysis(
     monthly_columns,
     yearly_data,
     yearly_columns,
-    consistency_data,
-    consistency_columns,
+    cumsum_data,
+    cumsum_columns,
 ):
     from itertools import product
 
@@ -359,20 +361,38 @@ def callback_graph_analysis(
         all_graphs, labels, active_tab="Maximum Rainfall Events"
     )
 
-    # CONSISTENCY
+    # CUMSUM
 
-    consistency = pyfunc.transform_to_dataframe(consistency_data, consistency_columns)
+    cumsum = pyfunc.transform_to_dataframe(cumsum_data, cumsum_columns)
 
-    graph_consistency = [
-        pyfigure.figure_consistency_single(consistency, col=station)
-        for station in consistency.columns
+    graph_cumsum = [
+        pyfigure.figure_cumsum_single(cumsum, col=station) for station in cumsum.columns
     ]
 
-    children_consistency = pylayoutfunc.create_tabcard_graph_layout(
-        graph_consistency, consistency.columns
+    children_cumsum = pylayoutfunc.create_tabcard_graph_layout(
+        graph_cumsum, cumsum.columns
     )
 
-    return children_analysis, children_consistency
+    # CONSISTENCY
+
+    if cumsum.columns.size == 1:
+        children_consistency = (
+            dcc.Graph(
+                figure=pyfigure.figure_empty(text="Not Available for Single Station"),
+                config={"staticPlot": True},
+            ),
+        )
+    else:
+        graph_consistency = [
+            pyfigure.figure_consistency(cumsum, col=station)
+            for station in cumsum.columns
+        ]
+
+        children_consistency = pylayoutfunc.create_tabcard_graph_layout(
+            graph_consistency, cumsum.columns
+        )
+
+    return children_analysis, children_cumsum, children_consistency
 
 
 @app.callback(
