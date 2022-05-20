@@ -131,3 +131,10 @@ def transform_to_dataframe(
                 )
 
     return dataframe
+
+
+def calc_consistency(dataframe):
+
+    consistency = dataframe.resample("YS").sum().cumsum()
+
+    return consistency.round()

@@ -56,7 +56,27 @@ ALERT_README = dbc.Alert(
     color="warning",
 )
 
-HTML_ALERT_README = pylayoutfunc.create_HTML_alert(ALERT_README, className="")
+HTML_ALERT_README = pylayoutfunc.create_HTML_alert(ALERT_README, className=None)
+
+ALERT_SPONSOR = dbc.Alert(
+    [
+        "Terima kasih untuk ",
+        html.A(
+            "FIAKO Engineering",
+            href="https://fiako.co.id",
+        ),
+        " yang telah mensponsori versi v1.1.0. Untuk catatan pembaruan bisa dilihat melalui ",
+        html.A(
+            "halaman rilis di github",
+            href="https://github.com/taruma/dash-hidrokit-rainfall/releases/tag/v1.1.0",
+        ),
+        ".",
+    ],
+    color="info",
+)
+
+HTML_ALERT_SPONSOR = pylayoutfunc.create_HTML_alert(ALERT_SPONSOR, className=None)
+
 
 DCC_UPLOAD = html.Div(
     dcc.Upload(
@@ -307,6 +327,26 @@ HTML_ROW_GRAPH_ANALYSIS = html.Div(
     )
 )
 
+HTML_ROW_GRAPH_CONSISTENCY = html.Div(
+    dbc.Container(
+        [
+            html.H3("Consistency", className="text-center"),
+            dbc.Row(
+                dbc.Col(
+                    dcc.Loading(
+                        children=dcc.Graph(
+                            figure=pyfigure.figure_empty(),
+                            config={"staticPlot": True},
+                        ),
+                        id="tab-graph-consistency",
+                    ),
+                    width={"size": 6, "offset": 3},
+                ),
+            ),
+        ],
+        fluid=True,
+    )
+)
 
 _HTML_TROUBLESHOOT = html.Div(
     dbc.Container(

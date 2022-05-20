@@ -39,6 +39,7 @@ app.layout = dbc.Container(
         pylayout.HTML_TITLE,
         pylayout.HTML_SUBTITLE,
         pylayout.HTML_ALERT_README,
+        pylayout.HTML_ALERT_SPONSOR,
         pylayout.HTML_ROW_BUTTON_UPLOAD,
         pylayout.HTML_ROW_TABLE,
         pylayout.HTML_ROW_BUTTON_VIZ,
@@ -48,6 +49,7 @@ app.layout = dbc.Container(
         pylayout.HTML_ROW_TABLE_ANALYZE,
         pylayout.HTML_ROW_BUTTON_VIZ_ANALYSIS,
         pylayout.HTML_ROW_GRAPH_ANALYSIS,
+        pylayout.HTML_ROW_GRAPH_CONSISTENCY,
         pylayout.HTML_ALERT_CONTRIBUTION,
         pylayout.HTML_MADEBY,
         pylayout.HTML_OTHER_PROJECTS,
@@ -80,7 +82,7 @@ def callback_upload(content, filename, filedate, _):
 
     if ctx.triggered[0]["prop_id"] == "button-skip.n_clicks":
         dataframe = pd.read_csv(
-            Path(r"./example_2Y4S_named.csv"), index_col=0, parse_dates=True
+            Path(r"./example_9Y1S_named.csv"), index_col=0, parse_dates=True
         )
         filename = None
         filedate = None
@@ -91,12 +93,13 @@ def callback_upload(content, filename, filedate, _):
     button_viz_outline = True
 
     if dataframe is not None:
+        editable = [False] + [True] * max(1, (len(dataframe.columns) - 1))
         children = pylayoutfunc.create_table_layout(
             dataframe,
             "output-table",
             filename=filename,
             filedate=filedate,
-            editable=True,
+            editable=editable,
             renamable=True,
         )
         upload_disabled = False
@@ -188,15 +191,33 @@ def callback_analyze(_, table_data, table_columns):
 
     try:
         dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
+
+        # SUMMARY
         summary_all = pyfunc.generate_summary_all(dataframe, n_days=["16D", "MS", "YS"])
-        tables = [
+        tables_summary = [
             pylayoutfunc.create_table_summary(
                 summary, f"table-analyze-{counter}", deletable=False
             )
             for counter, summary in enumerate(summary_all)
         ]
 
-        children = pylayoutfunc.create_tabcard_table_layout(tables)
+        # CONSISTENCY
+        consistency = pyfunc.calc_consistency(dataframe)
+
+        _, tables_consistency = pylayoutfunc.create_table_layout(
+            consistency, "table-consistency", deletable=False
+        )
+
+        tables_consistency = [tables_consistency]
+
+        # LAYOUT
+        tables_all = tables_summary + tables_consistency
+        tab_names = "Biweekly Monthly Yearly Consistency".split()
+
+        children = pylayoutfunc.create_tabcard_table_layout(
+            tables_all, tab_names=tab_names
+        )
+
         button_viz_analysis_disabled = False
         button_viz_analysis_outline = False
         row_button_download_analysis_style = {"visibility": "visible"}
@@ -220,6 +241,8 @@ def callback_analyze(_, table_data, table_columns):
     State("table-analyze-1", "columns"),
     State("table-analyze-2", "data"),
     State("table-analyze-2", "columns"),
+    State("table-consistency", "data"),
+    State("table-consistency", "columns"),
     prevent_initial_call=True,
 )
 def callback_download_results(
@@ -230,6 +253,8 @@ def callback_download_results(
     monthly_columns,
     yearly_data,
     yearly_columns,
+    consistency_data,
+    consistency_columns,
 ):
 
     biweekly = (biweekly_data, biweekly_columns)
@@ -248,8 +273,14 @@ def callback_download_results(
         )
         summary_all.append(dataframe)
 
+    consistency = pyfunc.transform_to_dataframe(consistency_data, consistency_columns)
+    stations = consistency.columns.to_list()
+    consistency.columns = pd.MultiIndex.from_product([stations, [""]])
+
     dataframe_all = pd.concat(
-        summary_all, axis=1, keys=["Biweekly", "Monthly", "Yearly"]
+        summary_all + [consistency],
+        axis=1,
+        keys=["Biweekly", "Monthly", "Yearly", "Consistency"],
     )
 
     return dcc.send_data_frame(dataframe_all.to_csv, "results.csv")
@@ -257,6 +288,7 @@ def callback_download_results(
 
 @app.callback(
     Output("tab-graph-analysis", "children"),
+    Output("tab-graph-consistency", "children"),
     Input("button-viz-analysis", "n_clicks"),
     State("table-analyze-0", "data"),
     State("table-analyze-0", "columns"),
@@ -264,6 +296,8 @@ def callback_download_results(
     State("table-analyze-1", "columns"),
     State("table-analyze-2", "data"),
     State("table-analyze-2", "columns"),
+    State("table-consistency", "data"),
+    State("table-consistency", "columns"),
     prevent_initial_call=True,
 )
 def callback_graph_analysis(
@@ -274,6 +308,8 @@ def callback_graph_analysis(
     monthly_columns,
     yearly_data,
     yearly_columns,
+    consistency_data,
+    consistency_columns,
 ):
     from itertools import product
 
@@ -319,9 +355,24 @@ def callback_graph_analysis(
     labels = [": ".join(i) for i in product(label_ufunc, label_periods)]
     labels += ["Maximum Rainfall Events"]
 
-    children = pylayoutfunc.create_tabcard_graph_layout(all_graphs, labels, active_tab='Maximum Rainfall Events')
+    children_analysis = pylayoutfunc.create_tabcard_graph_layout(
+        all_graphs, labels, active_tab="Maximum Rainfall Events"
+    )
 
-    return children
+    # CONSISTENCY
+
+    consistency = pyfunc.transform_to_dataframe(consistency_data, consistency_columns)
+
+    graph_consistency = [
+        pyfigure.figure_consistency_single(consistency, col=station)
+        for station in consistency.columns
+    ]
+
+    children_consistency = pylayoutfunc.create_tabcard_graph_layout(
+        graph_consistency, consistency.columns
+    )
+
+    return children_analysis, children_consistency
 
 
 @app.callback(

@@ -10,21 +10,35 @@ def create_table_layout(
     idtable,
     filename=None,
     filedate=None,
-    editable=False,
+    editable: list | bool = False,
     deletable=True,
     renamable=False,
 ):
+    from collections.abc import Iterable
+
     new_dataframe = dataframe.rename_axis("DATE").reset_index()
     new_dataframe.DATE = new_dataframe.DATE.dt.date
+
+    editable = (
+        editable
+        if isinstance(editable, Iterable)
+        else [editable] * len(new_dataframe.columns)
+    )
+
     table = dash_table.DataTable(
         id=idtable,
         columns=[
-            {"name": i, "id": i, "deletable": deletable, "renamable": renamable}
-            for i in new_dataframe.columns
+            {
+                "name": i,
+                "id": i,
+                "deletable": deletable,
+                "renamable": renamable,
+                "editable": edit_col,
+            }
+            for i, edit_col in zip(new_dataframe.columns, editable)
         ],
         data=new_dataframe.to_dict("records"),
         page_size=20,
-        editable=editable,
         cell_selectable=True,
         filter_action="native",
         sort_action="native",

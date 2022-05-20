@@ -493,3 +493,64 @@ def figure_summary_maxdate(
         data.marker.color = color
 
     return dcc.Graph(figure=fig)
+
+
+def figure_consistency_single(consistency: pd.DataFrame, col: str = None) -> go.Figure:
+    import re
+
+    col = consistency.columns[0] if col is None else col
+
+    new_dataframe = consistency.copy()
+    new_dataframe["number"] = np.arange(1, len(new_dataframe) + 1)
+
+    fig = px.scatter(
+        x=new_dataframe.number,
+        y=new_dataframe[col],
+        trendline="ols",
+        trendline_color_override=pytemplate.hktemplate.layout.colorway[1],
+    )
+
+    # MODIFIED SCATTER
+
+    _scatter = fig.data[0]
+    _scatter.mode = "markers+lines"
+    _scatter.line.dash = "dashdot"
+    _scatter.line.width = 1
+    _scatter.marker.size = 12
+    _scatter.marker.symbol = "circle"
+    _scatter.name = col
+    _scatter.hovertemplate = (
+        f"{col}<br><b>%{{y}} mm</b><br><i>%{{x}}</i><extra></extra>"
+    )
+
+    # MODIFIED TRENDLINE
+
+    _trendline = fig.data[1]
+    _oldhovertemplate = _trendline.hovertemplate
+
+    if _oldhovertemplate != "<extra></extra>":
+        re_pattern = re.compile("<br>(.+)<br>R.+=([0-9.]+)<br>")
+        equation, r2 = re_pattern.findall(_oldhovertemplate)[0]
+        _newtemplate = (
+            "<b>OLS trendline</b><br>"
+            + f"<i>{equation}</i><br>"
+            + f"<i>R<sup>2</sup>: {r2}</i><br>"
+            + "<b>%{y} mm</b> (trend)<br>"
+            + "<i>%{x}</i>"
+            + "<extra></extra>"
+        )
+        _trendline.hovertemplate = _newtemplate
+
+    _trendline.showlegend = True
+    _trendline.name = "trendline"
+
+    fig.update_layout(
+        xaxis_title="<b>Date</b>",
+        yaxis_title="<b>Total Rainfall (mm/year)</b>",
+        margin=dict(l=0, t=35, b=0, r=0),
+        xaxis_tickvals=new_dataframe.number,
+        xaxis_ticktext=new_dataframe.index.year,
+        yaxis_tickformat=".0f",
+    )
+
+    return dcc.Graph(figure=fig)

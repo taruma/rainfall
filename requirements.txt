@@ -6,5 +6,6 @@ pandas==1.4.2
 plotly==5.7.0
 python_box==6.0.2
 requests==2.27.1
+statsmodels
 pyyaml
 gunicorn
