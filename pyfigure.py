@@ -599,7 +599,7 @@ def figure_consistency(cumsum: pd.DataFrame, col: str) -> go.Figure:
             + f"<i>{equation}</i><br>"
             + f"<i>R<sup>2</sup>: {r2}</i><br>"
             + "<b>%{y} mm</b> (trend)<br>"
-            + "<i>%{x}</i>"
+            + "<i>%{x} mm</i>"
             + "<extra></extra>"
         )
         _trendline.hovertemplate = _newtemplate
@@ -612,6 +612,7 @@ def figure_consistency(cumsum: pd.DataFrame, col: str) -> go.Figure:
         yaxis_title=f"<b>Cumulative Average Annual (mm)</b>",
         margin=dict(l=0, t=35, b=0, r=0),
         yaxis_tickformat=".0f",
+        xaxis_tickformat=".0f",
     )
 
     return dcc.Graph(figure=fig)

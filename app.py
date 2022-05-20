@@ -1,3 +1,4 @@
+from click import edit
 import dash
 import dash_bootstrap_components as dbc
 import pandas as pd
@@ -83,7 +84,7 @@ def callback_upload(content, filename, filedate, _):
 
     if ctx.triggered[0]["prop_id"] == "button-skip.n_clicks":
         dataframe = pd.read_csv(
-            Path(r"./example_9Y1S_named.csv"), index_col=0, parse_dates=True
+            Path(r"./example_2Y4S_named.csv"), index_col=0, parse_dates=True
         )
         filename = None
         filedate = None
@@ -94,7 +95,7 @@ def callback_upload(content, filename, filedate, _):
     button_viz_outline = True
 
     if dataframe is not None:
-        editable = [False] + [True] * max(1, (len(dataframe.columns) - 1))
+        editable = [False] + [True] * len(dataframe.columns)
         children = pylayoutfunc.create_table_layout(
             dataframe,
             "output-table",
