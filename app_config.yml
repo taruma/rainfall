@@ -4,7 +4,7 @@ DASH_APP:
   DEBUG: False
 
 DASH_THEME:
-  THEME: SIMPLEX
+  THEME: COSMO
 
 TEMPLATE:
   LOGO_SOURCE: https://raw.githubusercontent.com/hidrokit/static-assets/main/logo_0.4.0-v1.1/hidrokit-hidrokit/50x50square.png
