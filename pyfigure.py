@@ -545,7 +545,7 @@ def figure_cumsum_single(cumsum: pd.DataFrame, col: str = None) -> go.Figure:
     _trendline.name = "trendline"
 
     fig.update_layout(
-        xaxis_title="<b>Date</b>",
+        xaxis_title="<b>Year</b>",
         yaxis_title="<b>Cumulative Annual (mm)</b>",
         margin=dict(l=0, t=35, b=0, r=0),
         xaxis_tickvals=new_dataframe.number,
@@ -562,9 +562,9 @@ def figure_consistency(cumsum: pd.DataFrame, col: str) -> go.Figure:
     cumsum = cumsum.copy()
 
     # Create Mean Cumulative Other Stations
-    cumsum_y = cumsum[col]
+    cumsum_x = cumsum[col]
     other_stations = cumsum.columns.drop(col)
-    cumsum_x = cumsum[other_stations].mean(axis=1).cumsum()
+    cumsum_y = cumsum[other_stations].mean(axis=1)
 
     fig = px.scatter(
         x=cumsum_x,
@@ -608,8 +608,8 @@ def figure_consistency(cumsum: pd.DataFrame, col: str) -> go.Figure:
     _trendline.name = "trendline"
 
     fig.update_layout(
-        xaxis_title="<b>Cumulative Average Annual Other Stations (mm)</b>",
-        yaxis_title=f"<b>Cumulative Average Annual (mm)</b>",
+        xaxis_title=f"<b>Cumulative Annual {col} (mm)</b>",
+        yaxis_title="<b>Cumulative Average Annual References (mm)</b>",
         margin=dict(l=0, t=35, b=0, r=0),
         yaxis_tickformat=".0f",
         xaxis_tickformat=".0f",
