@@ -22,7 +22,7 @@ HTML_TITLE = html.Div(
     className="text-center",
 )
 
-HTML_SUBTITLE = html.P(
+HTML_SUBTITLE = html.Div(
     [
         "created by ",
         html.A("taruma", href="https://github.com/taruma"),
@@ -30,6 +30,14 @@ HTML_SUBTITLE = html.P(
         html.A("hidrokit", href="https://github.com/hidrokit"),
     ],
     className="text-center fs-5",
+)
+
+HTML_SPONSORED = html.Div(
+    [
+        "sponsored by ",
+        html.A("FIAKO Engineering", href="https://fiako.engineering"),
+    ],
+    className="text-center fs-5 mb-3",
 )
 
 ALERT_CONTRIBUTION = dbc.Alert(
@@ -54,6 +62,7 @@ ALERT_README = dbc.Alert(
         ".",
     ],
     color="warning",
+    className="m-4",
 )
 
 HTML_ALERT_README = pylayoutfunc.create_HTML_alert(ALERT_README, className=None)
@@ -414,21 +423,19 @@ HTML_FOOTER = html.Div(
                 "Taruma Sakti Megariansyah",
                 href="https://github.com/taruma",
             ),
-            ". MIT License. Visit on 👉 ",
-            dbc.Badge(
+            ". Sponsored by ",
+            html.A(
+              "FIAKO Engineering",
+              href="https://fiako.engineering",
+              target="_blank"
+            ),
+            ". MIT License. Visit on ",
+            html.A(
                 "Github",
                 href=appConfig.GITHUB_LINK,
-                color="secondary",
-                class_name="text-uppercase fs-6",
-                id="tooltip-github",
-                target="_blank",
-                style={"letter-spacing": "3px", "text-decoration": "none"},
             ),
-            dbc.Tooltip(
-                "👇 click me 👇", target="tooltip-github", placement="top", autohide=False
-            ),
-            " 👈.",
+            ".",
         ],
-        className="text-center",
+        className="text-center my-2",
     ),
 )

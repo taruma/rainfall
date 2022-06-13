@@ -12,6 +12,6 @@ TEMPLATE:
   SHOW_LEGEND_INSIDE: False
   SHOW_RANGESELECTOR: False
 
-VERSION: v1.2.0
-GITHUB_LINK: https://github.com/taruma/dash-hidrokit-rainfall
-GITHUB_REPO: taruma/dash-hidrokit-rainfall
+VERSION: v1.2.1
+GITHUB_LINK: https://github.com/fiakoenjiniring/rainfall
+GITHUB_REPO: fiakoenjiniring/rainfall

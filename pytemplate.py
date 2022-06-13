@@ -29,7 +29,7 @@ hktemplate.layout.images = [
         yanchor="middle",
         name="watermark-hidrokit",
         layer="below",
-        opacity=0.2,
+        opacity=0.1,
     ),
 ]
 

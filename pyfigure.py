@@ -29,7 +29,7 @@ def _generate_dict_watermark(n: int = 1, source=appConfig.TEMPLATE.WATERMARK_SOU
         yanchor="middle",
         name="watermark-hidrokit",
         layer="below",
-        opacity=0.2,
+        opacity=0.1,
     )
 
 
