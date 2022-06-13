@@ -80,7 +80,7 @@ def callback_upload(content, filename, filedate, _):
 
     if ctx.triggered[0]["prop_id"] == "button-skip.n_clicks":
         dataframe = pd.read_csv(
-            Path(r"./example_2Y4S_named.csv"), index_col=0, parse_dates=True
+            Path(r"./example_7Y5S.csv"), index_col=0, parse_dates=True
         )
         filename = None
         filedate = None
