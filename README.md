@@ -1,8 +1,8 @@
-# hidrokit Rainfall Data Explorer (hidrokit-RDE)
+# hidrokit Rainfall Data Explorer (hidrokit-rainfall)
 
-![image](https://user-images.githubusercontent.com/1007910/170817254-319f0c54-4432-4bcc-8889-2caeb6ae7f0b.png)
+![image](https://user-images.githubusercontent.com/1007910/173458676-3db6da81-d583-40d0-87b6-0a635e25e50d.png)
 
-__Rainfall Data Explorer__ (`hkrainfall` / `hidrokit-RDE`) adalah _dashboard_ untuk mengeksplorasi data hujan di setiap stasiunnya dan membandingkannya baik secara numerik maupun visual. `hkrainfall` dibuat menggunakan teknologi [Dash + Plotly](https://plotly.com/) dengan bahasa pemrograman Python. Proyek `hkrainfall` bersifat _open-source_ dengan lisensi MIT.
+__Rainfall Data Explorer__ (`hidrokit-rainfall`) adalah _dashboard_ untuk mengeksplorasi data hujan di setiap stasiunnya dan membandingkannya baik secara numerik maupun visual. `hidrokit-rainfall` dibuat menggunakan teknologi [Dash + Plotly](https://plotly.com/) dengan bahasa pemrograman Python. Proyek `hidrokit-rainfall` bersifat _open-source_ dengan lisensi MIT.
 
 ## Cara Menjalankan Dashboard (Lokal)
 
