@@ -3,7 +3,7 @@ import io
 import pandas as pd
 from dash import html
 import numpy as np
-from hktaruma import hk98
+from hidrokit.contrib.taruma import hk98
 
 
 def parse_upload_data(content, filename, filedate):

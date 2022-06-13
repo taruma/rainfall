@@ -9,3 +9,4 @@ requests==2.27.1
 statsmodels
 pyyaml
 gunicorn
+hidrokit==0.4.1
