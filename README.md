@@ -54,4 +54,4 @@ Navigasi dengan grafik interaktif plotly:
 
 ## Catatan
 
-- Dashboard ini seharusnya bergantung pada paket hidrokit terutama pada modul `hidrokit.contrib.taruma.hk98` mengenai rekap data (tabel analisis). Akan tetapi ditemukan isu di hidrokit/hidrokit#219. Sehingga untuk sementara modul tersebut terpisah dengan dashboard ini.
+- ~~Dashboard ini seharusnya bergantung pada paket hidrokit terutama pada modul `hidrokit.contrib.taruma.hk98` mengenai rekap data (tabel analisis). Akan tetapi ditemukan isu di hidrokit/hidrokit#219. Sehingga untuk sementara modul tersebut terpisah dengan dashboard ini.~~ Sudah menggunakan hidrokit versi 0.4.1.
