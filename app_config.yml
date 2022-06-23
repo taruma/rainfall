@@ -7,8 +7,8 @@ DASH_THEME:
   THEME: COSMO
 
 TEMPLATE:
-  LOGO_SOURCE: https://raw.githubusercontent.com/hidrokit/static-assets/main/logo_0.4.0-v1.1/hidrokit-hidrokit/50x50square.png
-  WATERMARK_SOURCE: https://raw.githubusercontent.com/hidrokit/static-assets/main/logo_0.4.0-v1.1/hidrokit-hidrokit/400x100/400x100transparent.png
+  LOGO_SOURCE: https://raw.githubusercontent.com/fiakoenjiniring/static-assets/main/logo/fiakodev-logo-simple-1000-400.png
+  WATERMARK_SOURCE: https://raw.githubusercontent.com/fiakoenjiniring/static-assets/main/logo/fiakodev-logo-simple-1000-400.png
   SHOW_LEGEND_INSIDE: False
   SHOW_RANGESELECTOR: False
 
