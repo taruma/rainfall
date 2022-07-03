@@ -1,4 +1,4 @@
-# Rainfall Data Explorer (hidrokit-rainfall)
+# RAINFALL DATA EXPLORER (hidrokit-rainfall)
 
 <div align="center">
 <img src="./_readme/fiakodev-rainfall-thumbnail.png" alt="hidrokit-rainfall thumbnail"><br>
