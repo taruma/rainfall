@@ -11,23 +11,74 @@
 <img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/fiakoenjiniring/rainfall.svg?logo=github">
 </div>
 
-__Rainfall Data Explorer__ (`hidrokit-rainfall`) adalah _dashboard_ untuk mengeksplorasi data hujan di setiap stasiunnya dan membandingkannya baik secara numerik maupun visual. `hidrokit-rainfall` dibuat menggunakan teknologi [Dash + Plotly](https://plotly.com/) dengan bahasa pemrograman Python. Proyek `hidrokit-rainfall` bersifat _open-source_ dengan lisensi MIT.
+**Rainfall Data Explorer** atau `hidrokit-rainfall` adalah aplikasi web atau dashboard yang dapat digunakan untuk menganalisis data hujan harian. Dari aplikasi ini dapat memperoleh informasi hujan maksimum, total hujan, hari hujan, hari kering, dan kejadian hujan maksimum setiap periode yang ditentukannya dengan presentasi menggunakan visualisasi data. Grafik kumulatif tahunan dan konsistensi (kurva massa ganda) juga ditambahkan sejak versi v1.1.x. 
 
-## Cara Menjalankan Dashboard (Lokal)
+## FITUR APLIKASI
 
-Sangat dianjurkan untuk menjalankan dashboard ini menggunakan mesin lokal.
+<div align="center">
+<h3>Eksplorasi Data Hujan</h3>
+<img src="./_readme/fkrainfall-ft-1-1.gif" width="450">
+<br>
+<span align="center">Interaksi Tabel Data Hujan</span>
+</div>
 
-- Buat _virtual environment_ menggunakan `environment.yml` (untuk conda) atau `requirements.txt` (untuk venv).
-- Jalankan `app.py` di terminal.
-- Buka alamat `http://127.0.0.1:8050/` di browser.
+<div align="center">
+<h3>Visualisasi Data Hujan</h3>
+<img src="./_readme/fkrainfall-ft-2-1.gif" width="450">
+<br>
+<span align="center">Visualisasi Data Hujan (line)</span>
+<br><br>
+<img src="./_readme/fkrainfall-ft-2-2.gif" width="450">
+<br>
+<span align="center">Visualisasi Data Hujan (bar)</span>
+</div>
 
-## Cara Penggunaan
+<div align="center">
+<h3>Analisis Data Hujan</h3>
+<img src="./_readme/fkrainfall-ft-3-1.gif" width="450">
+<br>
+<span align="center">Hasil Analisis (Tabel)</span>
+<br><br>
+<img src="./_readme/fkrainfall-ft-3-2.gif" width="450">
+<br>
+<span align="center">Download Hasil Analisis (CSV)</span>
+</div>
 
+<div align="center">
+<h3>Visualisasi Analisis Data Hujan</h3>
+<img src="./_readme/fkrainfall-ft-4-1.gif" width="450">
+<br>
+<span align="center">Visualisasi Analisis (Rekap)</span>
+<br><br>
+<img src="./_readme/fkrainfall-ft-4-2.gif" width="450">
+<br>
+<span align="center">Visualisasi Max + Sum</span>
+<br><br>
+<img src="./_readme/fkrainfall-ft-4-3.gif" width="450">
+<br>
+<span align="center">Visualisasi Dry + Rain</span>
+<br><br>
+<img src="./_readme/fkrainfall-ft-4-4.gif" width="450">
+<br>
+<span align="center">Visualisasi Kejadian Hujan Maksimum</span>
+<br><br>
+<img src="./_readme/fkrainfall-ft-4-5.gif" width="450">
+<br>
+<span align="center">Kumulatif Tahunan</span>
+<br><br>
+<img src="./_readme/fkrainfall-ft-4-6.gif" width="450">
+<br>
+<span align="center">Konsistensi (Kurva Massa Ganda)</span>
+</div>
 
+## KEKURANGAN
 
-## Catatan
+Berikut daftar kekurangan atau _known issues_ aplikasi ini:
 
-- ~~Dashboard ini seharusnya bergantung pada paket hidrokit terutama pada modul `hidrokit.contrib.taruma.hk98` mengenai rekap data (tabel analisis). Akan tetapi ditemukan isu di hidrokit/hidrokit#219. Sehingga untuk sementara modul tersebut terpisah dengan dashboard ini.~~ Sudah menggunakan hidrokit versi 0.4.1.
+- Perlu dilakukan koreksi ataupun analisis lebih lanjut untuk masuk ke proses analisis frekuensi. Contohnya:
+    - Koreksi kurva massa ganda.
+    - Menghitung hujan wilayah.
+- Harus melakukan pengolahan tabel setelah menerima hasil analisis dalam bentuk CSV. 
 
 ## LISENSI
 
