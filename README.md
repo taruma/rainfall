@@ -1,57 +1,107 @@
-# hidrokit Rainfall Data Explorer (hidrokit-rainfall)
+# RAINFALL DATA EXPLORER (hidrokit-rainfall)
 
-![image](https://user-images.githubusercontent.com/1007910/173458676-3db6da81-d583-40d0-87b6-0a635e25e50d.png)
+<div align="center">
+<img src="./_readme/fiakodev-rainfall-thumbnail.png" alt="hidrokit-rainfall thumbnail"><br>
 
-__Rainfall Data Explorer__ (`hidrokit-rainfall`) adalah _dashboard_ untuk mengeksplorasi data hujan di setiap stasiunnya dan membandingkannya baik secara numerik maupun visual. `hidrokit-rainfall` dibuat menggunakan teknologi [Dash + Plotly](https://plotly.com/) dengan bahasa pemrograman Python. Proyek `hidrokit-rainfall` bersifat _open-source_ dengan lisensi MIT.
+<img alt="developed by" src="https://img.shields.io/badge/developed%20by-taruma%20%26%20fiakodev-orange">
+<img alt="project by" src="https://img.shields.io/badge/project%20by-taruma%20%26%20PT.%20FIAKO%20ENJINIRING%20INDONESIA-blue">
+<img alt="License" src="https://img.shields.io/github/license/fiakoenjiniring/rainfall.svg">
+<br>
+<img alt="GitHub release" src="https://img.shields.io/github/release/fiakoenjiniring/rainfall.svg?logo=github">
+<img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/fiakoenjiniring/rainfall.svg?logo=github">
+</div>
 
-## Cara Menjalankan Dashboard (Lokal)
+**Rainfall Data Explorer** atau `hidrokit-rainfall` adalah aplikasi web atau dashboard yang dapat digunakan untuk menganalisis data hujan harian. Dari aplikasi ini dapat memperoleh informasi hujan maksimum, total hujan, hari hujan, hari kering, dan kejadian hujan maksimum setiap periode yang ditentukannya dengan presentasi menggunakan visualisasi data. Grafik kumulatif tahunan dan konsistensi (kurva massa ganda) juga ditambahkan sejak versi v1.1.x. 
 
-Sangat dianjurkan untuk menjalankan dashboard ini menggunakan mesin lokal.
+## FITUR APLIKASI
 
-- Buat _virtual environment_ menggunakan `environment.yml` (untuk conda) atau `requirements.txt` (untuk venv).
-- Jalankan `app.py` di terminal.
-- Buka alamat `http://127.0.0.1:8050/` di browser.
+<div align="center">
+<h3>Eksplorasi Data Hujan</h3>
+<img src="./_readme/fkrainfall-ft-1-1.gif" width="450">
+<br>
+<span align="center">Interaksi Tabel Data Hujan</span>
+</div>
 
-## Cara Penggunaan
+<div align="center">
+<h3>Visualisasi Data Hujan</h3>
+<img src="./_readme/fkrainfall-ft-2-1.gif" width="450">
+<br>
+<span align="center">Visualisasi Data Hujan (line)</span>
+<br><br>
+<img src="./_readme/fkrainfall-ft-2-2.gif" width="450">
+<br>
+<span align="center">Visualisasi Data Hujan (bar)</span>
+</div>
 
-Dashboard ini bisa membaca berkas berformat '.csv' dengan:
+<div align="center">
+<h3>Analisis Data Hujan</h3>
+<img src="./_readme/fkrainfall-ft-3-1.gif" width="450">
+<br>
+<span align="center">Hasil Analisis (Tabel)</span>
+<br><br>
+<img src="./_readme/fkrainfall-ft-3-2.gif" width="450">
+<br>
+<span align="center">Download Hasil Analisis (CSV)</span>
+</div>
 
-- Kolom pertama merupakan tanggal dengan format yang dapat dibaca oleh fitur `parse_dates` yang tersedia di `pandas`. Direkomendasikan mengubahnya menjadi format `YYYY-MM-DD`. 
-- Kolom lainnya merupakan data hujan dengan header. 
-- Baris pertama akan dibaca sebagai header tabel, sehingga dianjurkan menambahkan label untuk setiap kolomnya. Gunakan label `DATE` untuk kolom tanggal yang akan digunakan sebagai index.
+<div align="center">
+<h3>Visualisasi Analisis Data Hujan</h3>
+<img src="./_readme/fkrainfall-ft-4-1.gif" width="450">
+<br>
+<span align="center">Visualisasi Analisis (Rekap)</span>
+<br><br>
+<img src="./_readme/fkrainfall-ft-4-2.gif" width="450">
+<br>
+<span align="center">Visualisasi Max + Sum</span>
+<br><br>
+<img src="./_readme/fkrainfall-ft-4-3.gif" width="450">
+<br>
+<span align="center">Visualisasi Dry + Rain</span>
+<br><br>
+<img src="./_readme/fkrainfall-ft-4-4.gif" width="450">
+<br>
+<span align="center">Visualisasi Kejadian Hujan Maksimum</span>
+<br><br>
+<img src="./_readme/fkrainfall-ft-4-5.gif" width="450">
+<br>
+<span align="center">Kumulatif Tahunan</span>
+<br><br>
+<img src="./_readme/fkrainfall-ft-4-6.gif" width="450">
+<br>
+<span align="center">Konsistensi (Kurva Massa Ganda)</span>
+</div>
 
-Navigasi dashboard ini antara lain:
+## KEKURANGAN
 
-- _Drag and Drop_ berkas atau pilih berkas pada tombol "Drag and Drop or Select Files". Klik "Use Example Data" jika ingin melihat demonstrasi dashboard ini.
-- Jika prosesnya berhasil, akan muncul tabel dengan data yang di-_upload_ atau contoh data. Tabel ini _editable_ sehingga bisa menyesuaikan saat proses pengoreksian saat eksplorasi data. Bisa juga diubah nama tabelnya. Pastikan nama kolom berbeda dan nama kolom pertama (tanggal) selalu "DATE".
-- Klik "Visualize Data" untuk melihat visualisasi data. Pada tahap ini, Anda bisa kembali ke tabel jika ingin melakukan pengoreksian data. Anda juga bisa melakukan filter pada setiap kolom untuk eksplorasi selanjutnya.
-- Tabel yang telah diubah, bisa di-_download_ kembali dalam bentuk CSV. 
-- Setelah tabel sudah dikoreksi. Bisa dilanjutkan ke tahapan analisis data. Perlu diingat, data yang dianalisis sesuai dengan tampilan/informasi tabel terkini. Jadi, jika masih ada filter, maka analisis hanya dilakukan pada data yang telah terfilter.
-- Klik "Analyze Data" untuk melakukan analisis data. Perlu diingat, proses ini akan memakan waktu jika memiliki dataset yang besar. Jadi, sangat disarankan menggunakan mesin lokal untuk proses ini. Karena yang dapat diakses di web hanya berupa demonstrasi saja dan menggunakan layanan gratis sehingga sangat terbatas kemampuannya.
-- Analisis data terbagi menjadi tiga periode yaitu 2 periode (biweekly), setiap bulanan (monthly), dan tahunan (yearly). Sebagai catatan, biweekly itu dibagi berdasarkan 16 hari pertama kemudian sisa harinya pada setiap bulan.
-- __Baru di `v1.1.0`__: Analisis konsistensi (kurva massa ganda) dan kumulatif hujan tahunan. 
-- Analisis data yang dilakukan berupa:
-    - `days`: Jumlah hari pada setiap periodenya (16 hari untuk biweekly, 1 bulan untuk monthly, dan 1 tahun untuk yearly).
-    - `max`: Nilai maksimum pada setiap periode.
-    - `sum`: Total nilai pada setiap periode.
-    - `n_rain`: Jumlah hari hujan di setiap periode.
-    - `n_dry`: Jumlah hari kering di setiap periode. Catatan: Ini akan menghitung nilai `np.nan` sebagai hari kering.
-    - `max_date`: Tanggal kejadian hujan maksimum terjadi pada setiap periode. 
-- Tabel analisis tidak dapat diubah dan hanya sebagai penyedia informasi saja.
-- Melihat tabel analisis rasanya cukup sulit untuk diceritakan atau diinterpretasikan, oleh karena itu disediakan tombol "Visualize it!" untuk melakuakn visualisasi tabel analisis.
-- Selain melakukan visualisasi, tabel analisis juga dapat di-_download_ dengan mengklik tombol "Download Results as CSV". Perlu dicatat, `dataframe` tabel analisis menggunakan `MultiIndex` sehingga pada format CSV akan perlu dilakukan pengolahan lagi. 
-- Visualisasi dari tabel analisis berupa:
-    - Group Bar Chart untuk setiap periode dengan kolom `max` dan `sum`. Grafik ini bisa melihat secara langsung perbandingan nilai antar stasiun. 
-    - Stack Bar Chart untuk setiap periode dengan kolom `n_rain` dan `n_dry`. Grafik ini bisa memberikan gambaran periode yang memiliki frekuensi hujan/kekeringan tinggi/rendah secara sekilas.
-    - Bubble Chart (Maximum Rainfall Events) memberikan gambaran besar terkait tanggal kejadian saat hujan maksimum terjadi di setiap stasiun. Ukuran lingkaran menunjukkan seberapa besar hujan maksimum yang terjadi. 
-    - __Baru di `v1.1.0`__: Ditambahkan grafik kumulatif hujan tahunan dan konsistensi (kurva massa ganda) untuk setiap stasiun.
+Berikut daftar kekurangan atau _known issues_ aplikasi ini:
 
-Navigasi dengan grafik interaktif plotly:
+- Perlu dilakukan koreksi ataupun analisis lebih lanjut untuk masuk ke proses analisis frekuensi. Contohnya:
+    - Koreksi kurva massa ganda.
+    - Menghitung hujan wilayah.
+- Harus melakukan pengolahan tabel setelah menerima hasil analisis dalam bentuk CSV. 
 
-- Pada setiap grafik plotly, dapat dilakukan interaksi langsung dengan grafik seperti mengatur stasiun/data mana saja yang ditampilkan, pembesaran pada periode tertentu. mengatur ukuran sumbu, dll.
-- Sangat dianjurkan untuk mengeksplorasi sendiri mengenai _mode bar_ yang ada di kanan atas setiap grafik plotly. 
-- Setiap grafik bisa di-_download_ dalam bentuk `.png` untuk kepentingan menaruh di dokumen atau lainnya. 
+## LISENSI
 
-## Catatan
+[MIT LICENSE](./LICENSE)
 
-- ~~Dashboard ini seharusnya bergantung pada paket hidrokit terutama pada modul `hidrokit.contrib.taruma.hk98` mengenai rekap data (tabel analisis). Akan tetapi ditemukan isu di hidrokit/hidrokit#219. Sehingga untuk sementara modul tersebut terpisah dengan dashboard ini.~~ Sudah menggunakan hidrokit versi 0.4.1.
+```
+Copyright ©️ 2022 Taruma Sakti Megariansyah, PT. FIAKO ENJINIRING INDONESIA
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
