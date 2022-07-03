@@ -27,7 +27,7 @@ HTML_SUBTITLE = html.Div(
         "created by ",
         html.A("taruma", href="https://github.com/taruma"),
         " & powered by ",
-        html.A("hidrokit", href="https://github.com/hidrokit"),
+        html.A("hidrokit", href="https://github.com/hidrokit/hidrokit"),
     ],
     className="text-center fs-5",
 )
@@ -54,10 +54,10 @@ HTML_ALERT_CONTRIBUTION = pylayoutfunc.create_HTML_alert(ALERT_CONTRIBUTION)
 
 ALERT_README = dbc.Alert(
     [
-        "Untuk petunjuk penggunaan bisa baca ",
+        "Informasi aplikasi ini dapat dilihat di ",
         html.A(
-            "README di github",
-            href="https://github.com/taruma/dash-hidrokit-rainfall#readme",
+            "GitHub README",
+            href="https://github.com/fiakoenjiniring/rainfall#readme",
         ),
         ".",
     ],
@@ -72,12 +72,12 @@ ALERT_SPONSOR = dbc.Alert(
         "Terima kasih untuk ",
         html.A(
             "FIAKO Engineering",
-            href="https://fiako.co.id",
+            href="https://fiako.engineering",
         ),
         " yang telah mensponsori versi v1.1.0. Untuk catatan pembaruan bisa dilihat melalui ",
         html.A(
             "halaman rilis di github",
-            href="https://github.com/taruma/dash-hidrokit-rainfall/releases/tag/v1.1.0",
+            href="https://github.com/fiakoenjiniring/rainfall/releases/tag/v1.1.0",
         ),
         ".",
     ],
@@ -419,13 +419,13 @@ HTML_FOOTER = html.Div(
         [
             html.Span("\u00A9"),
             " 2022 ",
+            # html.A(
+            #     "Taruma Sakti Megariansyah",
+            #     href="https://github.com/taruma",
+            # ),
+            # ", ",
             html.A(
-                "Taruma Sakti Megariansyah",
-                href="https://github.com/taruma",
-            ),
-            ". Sponsored by ",
-            html.A(
-              "FIAKO Engineering",
+              "PT. FIAKO ENJINIRING INDONESIA",
               href="https://fiako.engineering",
               target="_blank"
             ),

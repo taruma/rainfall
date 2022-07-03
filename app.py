@@ -37,7 +37,6 @@ server = app.server
 app.layout = dbc.Container(
     [
         pylayout.HTML_TITLE,
-        pylayout.HTML_SUBTITLE,
         pylayout.HTML_ALERT_README,
         pylayout.HTML_ROW_BUTTON_UPLOAD,
         pylayout.HTML_ROW_TABLE,
@@ -50,7 +49,8 @@ app.layout = dbc.Container(
         pylayout.HTML_ROW_GRAPH_ANALYSIS,
         pylayout.HTML_ROW_GRAPH_CUMSUM,
         pylayout.HTML_ROW_GRAPH_CONSISTENCY,
-        pylayout.HTML_MADEBY,
+        # pylayout.HTML_MADEBY,
+        pylayout.HTML_SUBTITLE,
         pylayout.HTML_FOOTER,
     ],
     fluid=True,
