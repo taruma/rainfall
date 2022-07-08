@@ -8,7 +8,11 @@
 <img alt="License" src="https://img.shields.io/github/license/fiakoenjiniring/rainfall.svg">
 <br>
 <img alt="GitHub release" src="https://img.shields.io/github/release/fiakoenjiniring/rainfall.svg?logo=github">
-<img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/fiakoenjiniring/rainfall.svg?logo=github">
+<img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/fiakoenjiniring/rainfall.svg?logo=github"><br>
+
+<a href="https://github.com/fiakoenjiniring/rainfall" target="_blank"><strong>Github Repository</strong></a> // <code>fiakoenjiniring/rainfall</code><br>
+<a href="https://rainfall.dev.fiako.engineering" target="_blank"><strong>Aplikasi</strong></a> // <code>rainfall.dev.fiako.engineering</code><br>
+<a href="https://youtu.be/IhjSoYlHW04" target="_blank"><strong>Presentasi & Demonstrasi</strong></a>
 </div>
 
 **Rainfall Data Explorer** atau `hidrokit-rainfall` adalah aplikasi web atau dashboard yang dapat digunakan untuk menganalisis data hujan harian. Dari aplikasi ini dapat memperoleh informasi hujan maksimum, total hujan, hari hujan, hari kering, dan kejadian hujan maksimum setiap periode yang ditentukannya dengan presentasi menggunakan visualisasi data. Grafik kumulatif tahunan dan konsistensi (kurva massa ganda) juga ditambahkan sejak versi v1.1.x. 
