@@ -67,6 +67,23 @@ ALERT_README = dbc.Alert(
 
 HTML_ALERT_README = pylayoutfunc.create_HTML_alert(ALERT_README, className=None)
 
+ALERT_END_OF_ONLINE_SERVICE = dbc.Alert(
+    [
+        "Layanan online aplikasi fiakodev akan dihentikan pada November 2022. ",
+        "Baca ", 
+        html.A(
+            "logs: layanan online aplikasi fiakodev akan dihentikan",
+            href="https://dev.fiako.engineering/logs/layanan-online-aplikasi-fiakodev",
+            target="_blank"
+        ),
+        " untuk informasi lebih lengkap."
+    ],
+    color="danger",
+    className="fw-bold"
+)
+
+HTML_ALERT_EOOS = pylayoutfunc.create_HTML_alert(ALERT_END_OF_ONLINE_SERVICE, className=None)
+
 ALERT_SPONSOR = dbc.Alert(
     [
         "Terima kasih untuk ",
