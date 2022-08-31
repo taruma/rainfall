@@ -38,6 +38,7 @@ app.layout = dbc.Container(
     [
         pylayout.HTML_TITLE,
         pylayout.HTML_ALERT_README,
+        pylayout.HTML_ALERT_EOOS,
         pylayout.HTML_ROW_BUTTON_UPLOAD,
         pylayout.HTML_ROW_TABLE,
         pylayout.HTML_ROW_BUTTON_VIZ,
