@@ -11,7 +11,7 @@
 <img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/fiakoenjiniring/rainfall.svg?logo=github"><br>
 
 <a href="https://github.com/fiakoenjiniring/rainfall" target="_blank"><strong>Github Repository</strong></a> // <code>fiakoenjiniring/rainfall</code><br>
-<a href="https://rainfall.dev.fiako.engineering" target="_blank"><strong>Aplikasi</strong></a> // <code>rainfall.dev.fiako.engineering</code><br>
+<a href="https://hidrokit-rainfall.herokuapp.com" target="_blank"><strong>Aplikasi</strong></a> // <code>hidrokit-rainfall.herokuapp.com</code><br>
 <a href="https://youtu.be/IhjSoYlHW04" target="_blank"><strong>Presentasi & Demonstrasi</strong></a>
 </div>
 
