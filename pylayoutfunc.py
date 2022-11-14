@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dash import html, dash_table, dcc
 import dash_bootstrap_components as dbc
 from pytemplate import hktemplate
