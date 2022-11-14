@@ -1,12 +1,19 @@
-dash==2.3.1
-dash_bootstrap_components==1.1.0
-dash_bootstrap_templates==1.0.5
-numpy==1.22.3
-pandas==1.4.2
-plotly==5.7.0
-python_box==6.0.2
-requests==2.27.1
-statsmodels
-pyyaml
-gunicorn
+# PYTHON 3.9.13
+
+# available in conda-forge
+pandas==1.5.1
+dash==2.7.0
+dash-bootstrap-components==1.2.1
+plotly==5.11.0
+python-box==6.1.0
+pyyaml==6.0
+statsmodels==0.13.5
+
+# pip exclusive (available in conda with different name)
+
+# pip only
+dash-bootstrap-templates==1.0.7
 hidrokit==0.4.1
+
+# server only
+gunicorn==20.1.0
