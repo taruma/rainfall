@@ -7,8 +7,8 @@ DASH_THEME:
   THEME: COSMO
 
 TEMPLATE:
-  LOGO_SOURCE: https://raw.githubusercontent.com/fiakoenjiniring/static-assets/main/logo/fiakodev-logo-simple-1000-400.png
-  WATERMARK_SOURCE: https://raw.githubusercontent.com/fiakoenjiniring/static-assets/main/logo/fiakodev-logo-simple-1000-400.png
+  LOGO_SOURCE: 
+  WATERMARK_SOURCE: 
   SHOW_LEGEND_INSIDE: False
   SHOW_RANGESELECTOR: False
 
