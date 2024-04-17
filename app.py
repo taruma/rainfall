@@ -1,12 +1,15 @@
+"""Main Dash App for Rainfall Analysis"""
+
+from itertools import product
+from pathlib import Path
+from dash import dcc, html, Input, Output, State
+import pandas as pd
 import dash
 import dash_bootstrap_components as dbc
-import pandas as pd
 import plotly.io as pio
-import pyfigure, pyfunc, pylayout, pylayoutfunc
-from dash import dcc, html, Input, Output, State
-from pathlib import Path
 from pyconfig import appConfig
 from pytemplate import hktemplate
+import pyfigure, pyfunc, pylayout, pylayoutfunc  # pylint: disable=multiple-imports
 
 pio.templates.default = hktemplate
 
@@ -17,14 +20,14 @@ DEBUG = appConfig.DASH_APP.DEBUG
 
 # BOOTSRAP THEME
 THEME = appConfig.DASH_THEME.THEME
-dbc_css = (
-    "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.4/dbc.min.css"
+DBC_CSS = (
+    "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.1.2/dbc.min.css"
 )
 
 # APP
 app = dash.Dash(
     APP_TITLE,
-    external_stylesheets=[getattr(dbc.themes, THEME), dbc_css],
+    external_stylesheets=[getattr(dbc.themes, THEME), DBC_CSS],
     title=APP_TITLE,
     update_title=UPDATE_TITLE,
     meta_tags=[
@@ -39,6 +42,7 @@ app.layout = dbc.Container(
         pylayout.HTML_TITLE,
         pylayout.HTML_ALERT_README,
         pylayout.HTML_ROW_BUTTON_UPLOAD,
+        pylayout.HTML_ROW_BUTTON_EXAMPLE,
         pylayout.HTML_ROW_TABLE,
         pylayout.HTML_ROW_BUTTON_VIZ,
         pylayout.HTML_ROW_OPTIONS_GRAPH_RAINFALL,
@@ -49,11 +53,11 @@ app.layout = dbc.Container(
         pylayout.HTML_ROW_GRAPH_ANALYSIS,
         pylayout.HTML_ROW_GRAPH_CUMSUM,
         pylayout.HTML_ROW_GRAPH_CONSISTENCY,
-        # pylayout.HTML_MADEBY,
+        html.Hr(),
         pylayout.HTML_SUBTITLE,
         pylayout.HTML_FOOTER,
     ],
-    fluid=True,
+    fluid=False,
     className="dbc",
 )
 
@@ -69,19 +73,32 @@ app.layout = dbc.Container(
     Input("dcc-upload", "contents"),
     State("dcc-upload", "filename"),
     State("dcc-upload", "last_modified"),
-    Input("button-skip", "n_clicks"),
+    Input("button-example-1", "n_clicks"),
+    Input("button-example-2", "n_clicks"),
+    Input("button-example-3", "n_clicks"),
+    Input("button-example-4", "n_clicks"),
     prevent_initial_call=True,
 )
-def callback_upload(content, filename, filedate, _):
+def callback_upload(content, filename, filedate, _b1, _b2, _b3, _b4):
+    """Callback for uploading data and displaying the table."""
+
     ctx = dash.callback_context
 
     if content is not None:
         children, dataframe = pyfunc.parse_upload_data(content, filename, filedate)
 
-    if ctx.triggered[0]["prop_id"] == "button-skip.n_clicks":
-        dataframe = pd.read_csv(
-            Path(r"./example_7Y5S.csv"), index_col=0, parse_dates=True
-        )
+    example_data = {
+        "button-example-1.n_clicks": r"./example_7Y5S.csv",
+        "button-example-2.n_clicks": r"./example_2Y4S_named.csv",
+        "button-example-3.n_clicks": r"./example_9Y1S_named.csv",
+        "button-example-4.n_clicks": r"./example_1Y7S_named.csv",
+    }
+
+    context_trigger_prop_id = ctx.triggered[0]["prop_id"]
+
+    if context_trigger_prop_id in example_data:
+        example_file = example_data[context_trigger_prop_id]
+        dataframe = pd.read_csv(Path(example_file), index_col=0, parse_dates=True)
         filename = None
         filedate = None
 
@@ -130,6 +147,8 @@ def callback_upload(content, filename, filedate, _):
     prevent_initial_call=True,
 )
 def callback_visualize(_, table_data, table_columns, graphbar_opt):
+    """Callback for visualizing the rainfall data."""
+
     dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
 
     row_download_table_style = {"visibility": "visible"}
@@ -139,13 +158,13 @@ def callback_visualize(_, table_data, table_columns, graphbar_opt):
     button_analyze_outline = False
 
     if dataframe.size > (366 * 8):
-        fig = pyfigure.figure_scatter(dataframe)
+        fig = pyfigure.generate_scatter_figure(dataframe)
     else:
         row_graphbar_options_style = {"visibility": "visible"}
         if graphbar_opt in ["group", "stack"]:
-            fig = pyfigure.figure_bar(dataframe, graphbar_opt)
+            fig = pyfigure.generate_bar_figure(dataframe, graphbar_opt)
         else:
-            fig = pyfigure.figure_scatter(dataframe)
+            fig = pyfigure.generate_scatter_figure(dataframe)
 
     return [
         fig,
@@ -165,6 +184,7 @@ def callback_visualize(_, table_data, table_columns, graphbar_opt):
     prevent_initial_call=True,
 )
 def callback_download_table(_, table_data, table_columns):
+    """Callback for downloading the table data."""
     dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
     return dcc.send_data_frame(dataframe.to_csv, "derived_table.csv")
 
@@ -182,6 +202,7 @@ def callback_download_table(_, table_data, table_columns):
     prevent_initial_call=True,
 )
 def callback_analyze(_, table_data, table_columns):
+    """Callback for analyzing the rainfall data."""
 
     button_viz_analysis_disabled = True
     button_viz_analysis_outline = True
@@ -200,7 +221,7 @@ def callback_analyze(_, table_data, table_columns):
         ]
 
         # CUMUMLATIVE SUM
-        cumsum = pyfunc.calc_cumsum(dataframe)
+        cumsum = pyfunc.calculate_cumulative_sum(dataframe)
 
         _, table_cumsum = pylayoutfunc.create_table_layout(
             cumsum, "table-cumsum", deletable=False
@@ -219,8 +240,12 @@ def callback_analyze(_, table_data, table_columns):
         button_viz_analysis_disabled = False
         button_viz_analysis_outline = False
         row_button_download_analysis_style = {"visibility": "visible"}
-    except Exception as e:
-        children = html.Div(f"SOMETHING ERROR {e}")
+    except (TypeError, ValueError) as e:
+        children = html.Div(
+            f"Input data or columns are not in the expected format: {e}"
+        )
+    except KeyError as e:
+        children = html.Div(f"Dataframe does not have the expected columns: {e}")
 
     return [
         children,
@@ -254,6 +279,7 @@ def callback_download_results(
     cumsum_data,
     cumsum_columns,
 ):
+    """Callback for downloading the analysis results."""
 
     biweekly = (biweekly_data, biweekly_columns)
     monthly = (monthly_data, monthly_columns)
@@ -310,7 +336,7 @@ def callback_graph_analysis(
     cumsum_data,
     cumsum_columns,
 ):
-    from itertools import product
+    """Callback for generating the analysis graphs."""
 
     label_periods = ["Biweekly", "Monthly", "Yearly"]
     label_maxsum = ["Max + Sum"]
@@ -334,7 +360,7 @@ def callback_graph_analysis(
         summary_all.append(dataframe)
 
     graphs_maxsum = [
-        pyfigure.figure_summary_maxsum(
+        pyfigure.generate_summary_maximum_sum(
             summary,
             title=f"<b>{period}: {title}</b>",
             period=period,
@@ -343,12 +369,12 @@ def callback_graph_analysis(
         for summary, title, period in zip(summary_all, label_maxsum * 3, label_periods)
     ]
     graphs_raindry = [
-        pyfigure.figure_summary_raindry(
+        pyfigure.generate_summary_rain_dry(
             summary, title=f"<b>{period}: {title}</b>", period=period
         )
         for summary, title, period in zip(summary_all, label_raindry * 3, label_periods)
     ]
-    graph_maxdate = [pyfigure.figure_summary_maxdate(summary_all)]
+    graph_maxdate = [pyfigure.generate_summary_maximum_date(summary_all)]
 
     all_graphs = graphs_maxsum + graphs_raindry + graph_maxdate
     labels = [": ".join(i) for i in product(label_ufunc, label_periods)]
@@ -363,7 +389,8 @@ def callback_graph_analysis(
     cumsum = pyfunc.transform_to_dataframe(cumsum_data, cumsum_columns)
 
     graph_cumsum = [
-        pyfigure.figure_cumsum_single(cumsum, col=station) for station in cumsum.columns
+        pyfigure.generate_cumulative_sum(cumsum, data_column=station)
+        for station in cumsum.columns
     ]
 
     children_cumsum = pylayoutfunc.create_tabcard_graph_layout(
@@ -375,13 +402,15 @@ def callback_graph_analysis(
     if cumsum.columns.size == 1:
         children_consistency = (
             dcc.Graph(
-                figure=pyfigure.figure_empty(text="Not Available for Single Station"),
+                figure=pyfigure.generate_empty_figure(
+                    text="Not Available for Single Station"
+                ),
                 config={"staticPlot": True},
             ),
         )
     else:
         graph_consistency = [
-            pyfigure.figure_consistency(cumsum, col=station)
+            pyfigure.generate_scatter_with_trendline(cumsum, data_column=station)
             for station in cumsum.columns
         ]
 
@@ -390,15 +419,6 @@ def callback_graph_analysis(
         )
 
     return children_analysis, children_cumsum, children_consistency
-
-
-@app.callback(
-    Output("row-troubleshoot", "children"),
-    Input("button-troubleshoot", "n_clicks"),
-    prevent_initial_call=True,
-)
-def _callback_troubleshoot(_):
-    return html.Div("troubleshoot")
 
 
 if __name__ == "__main__":

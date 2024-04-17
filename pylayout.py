@@ -1,7 +1,11 @@
+"""
+This module defines the layout components for a Dash application used for rainfall analysis.
+"""
+
 from dash import html, dcc
 import dash_bootstrap_components as dbc
-from pyconfig import appConfig
 import plotly.io as pio
+from pyconfig import appConfig
 from pytemplate import hktemplate
 import pyfigure
 import pylayoutfunc
@@ -15,7 +19,11 @@ HTML_TITLE = html.Div(
             className="float fw-bold text-center mt-3 fs-1 fw-bold",
         ),
         html.Span(
-            [appConfig.GITHUB_REPO, "@", appConfig.VERSION],
+            html.A(
+                [appConfig.GITHUB_REPO, "@", appConfig.VERSION],
+                href="https://github.com/taruma/rainfall",
+                target="_blank",
+            ),
             className="text-muted",
         ),
     ],
@@ -32,60 +40,19 @@ HTML_SUBTITLE = html.Div(
     className="text-center fs-5",
 )
 
-HTML_SPONSORED = html.Div(
-    [
-        "sponsored by ",
-        html.A("FIAKO Engineering", href="https://fiako.engineering"),
-    ],
-    className="text-center fs-5 mb-3",
-)
-
-ALERT_CONTRIBUTION = dbc.Alert(
-    [
-        "Tertarik untuk berkontribusi? Ingin terlibat proyek hidrokit seperti ini? hubungi saya di ",
-        html.A("hi@taruma.info", href="mailto:hi@taruma.info", className="text-bold"),
-        ". Langsung buat isu di ",
-        html.A("Github", href=appConfig.GITHUB_LINK),
-        " jika memiliki pertanyaan/komentar/kritik/saran atau menemui kesalahan di proyek ini.",
-    ]
-)
-
-HTML_ALERT_CONTRIBUTION = pylayoutfunc.create_HTML_alert(ALERT_CONTRIBUTION)
-
 ALERT_README = dbc.Alert(
     [
-        "Informasi aplikasi ini dapat dilihat di ",
-        html.A(
-            "GitHub README",
-            href="https://github.com/fiakoenjiniring/rainfall#readme",
-        ),
+        "Rainfall Data Explorer (hidrokit-rainfall) is a web application for "
+        "analyzing daily rainfall data, providing maximum rainfall, total rainfall, "
+        "rainy days, dry days, and maximum rainfall events visualization, "
+        "with added features like annual cumulative graph and consistency (mass curve)",
         ".",
     ],
     color="warning",
     className="m-4",
 )
 
-HTML_ALERT_README = pylayoutfunc.create_HTML_alert(ALERT_README, className=None)
-
-ALERT_SPONSOR = dbc.Alert(
-    [
-        "Terima kasih untuk ",
-        html.A(
-            "FIAKO Engineering",
-            href="https://fiako.engineering",
-        ),
-        " yang telah mensponsori versi v1.1.0. Untuk catatan pembaruan bisa dilihat melalui ",
-        html.A(
-            "halaman rilis di github",
-            href="https://github.com/fiakoenjiniring/rainfall/releases/tag/v1.1.0",
-        ),
-        ".",
-    ],
-    color="info",
-)
-
-HTML_ALERT_SPONSOR = pylayoutfunc.create_HTML_alert(ALERT_SPONSOR, className=None)
-
+HTML_ALERT_README = pylayoutfunc.create_html_alert(ALERT_README, class_name=None)
 
 DCC_UPLOAD = html.Div(
     dcc.Upload(
@@ -93,11 +60,12 @@ DCC_UPLOAD = html.Div(
         children=html.Div(
             [
                 dbc.Button(
-                    "Drag and Drop or Select Files",
+                    "Upload File (.csv)",
                     color="primary",
                     outline=False,
                     class_name="fs-4 text-center",
                     id="button-upload",
+                    size="lg",
                 )
             ]
         ),
@@ -115,24 +83,78 @@ HTML_ROW_BUTTON_UPLOAD = html.Div(
                         [DCC_UPLOAD],
                         width="auto",
                     ),
-                    dbc.Col(
-                        [
-                            dbc.Button(
-                                "Use Example Data",
-                                color="info",
-                                id="button-skip",
-                                class_name="fs-4 text-center",
-                            ),
-                        ],
-                        class_name="fs-4 text-center",
-                        width="auto",
-                    ),
                 ],
                 justify="center",
             ),
         ],
         fluid=True,
     ),
+)
+
+HTML_ROW_BUTTON_EXAMPLE = html.Div(
+    dbc.Container(
+        [
+            dbc.Row(
+                [
+                    dbc.Col(
+                        [
+                            dbc.Button(
+                                "Example 1 (5 Stations, 7 Years)",
+                                color="success",
+                                id="button-example-1",
+                                class_name="text-center",
+                                size="sm",
+                            ),
+                        ],
+                        class_name="text-center",
+                        width="auto",
+                    ),
+                    dbc.Col(
+                        [
+                            dbc.Button(
+                                "Example 2 (4 Stations, 2 Years)",
+                                color="success",
+                                id="button-example-2",
+                                class_name="text-center",
+                                size="sm",
+                            ),
+                        ],
+                        class_name="text-center",
+                        width="auto",
+                    ),
+                    dbc.Col(
+                        [
+                            dbc.Button(
+                                "Example 3 (1 Station, 9 Years)",
+                                color="success",
+                                id="button-example-3",
+                                class_name="text-center",
+                                size="sm",
+                            ),
+                        ],
+                        class_name="text-center",
+                        width="auto",
+                    ),
+                    dbc.Col(
+                        [
+                            dbc.Button(
+                                "Example 4 (7 Station, 1 Years)",
+                                color="success",
+                                id="button-example-4",
+                                class_name="text-center",
+                                size="sm",
+                            ),
+                        ],
+                        class_name="text-center",
+                        width="auto",
+                    ),
+                ],
+                justify="center",
+                class_name="my-3",
+            ),
+        ],
+        fluid=True,
+    )
 )
 
 HTML_ROW_TABLE = html.Div(
@@ -142,7 +164,7 @@ HTML_ROW_TABLE = html.Div(
                 dbc.CardBody(
                     id="row-table-uploaded",
                     children=dcc.Graph(
-                        figure=pyfigure.figure_empty(),
+                        figure=pyfigure.generate_empty_figure(),
                         config={"staticPlot": True},
                     ),
                 ),
@@ -228,7 +250,7 @@ HTML_ROW_GRAPH_ONE = html.Div(
             dcc.Loading(
                 dcc.Graph(
                     id="graph-rainfall",
-                    figure=pyfigure.figure_empty(),
+                    figure=pyfigure.generate_empty_figure(),
                     config={"staticPlot": True},
                 )
             )
@@ -271,7 +293,7 @@ HTML_ROW_TABLE_ANALYZE = html.Div(
     dbc.Container(
         dcc.Loading(
             children=dcc.Graph(
-                figure=pyfigure.figure_empty(),
+                figure=pyfigure.generate_empty_figure(),
                 config={"staticPlot": True},
             ),
             id="tab-analysis",
@@ -327,7 +349,7 @@ HTML_ROW_GRAPH_ANALYSIS = html.Div(
     dbc.Container(
         dcc.Loading(
             children=dcc.Graph(
-                figure=pyfigure.figure_empty(),
+                figure=pyfigure.generate_empty_figure(),
                 config={"staticPlot": True},
             ),
             id="tab-graph-analysis",
@@ -345,7 +367,7 @@ HTML_ROW_GRAPH_CUMSUM = html.Div(
                 dbc.Col(
                     dcc.Loading(
                         children=dcc.Graph(
-                            figure=pyfigure.figure_empty(),
+                            figure=pyfigure.generate_empty_figure(),
                             config={"staticPlot": True},
                         ),
                         id="tab-graph-cumsum",
@@ -367,7 +389,7 @@ HTML_ROW_GRAPH_CONSISTENCY = html.Div(
                 dbc.Col(
                     dcc.Loading(
                         children=dcc.Graph(
-                            figure=pyfigure.figure_empty(),
+                            figure=pyfigure.generate_empty_figure(),
                             config={"staticPlot": True},
                         ),
                         id="tab-graph-consistency",
@@ -381,53 +403,15 @@ HTML_ROW_GRAPH_CONSISTENCY = html.Div(
     className="my-3",
 )
 
-_HTML_TROUBLESHOOT = html.Div(
-    dbc.Container(
-        [
-            dbc.Row([html.Div("HEELLOOOO")]),
-            dbc.Button("Hello", id="button-troubleshoot"),
-            html.Div(id="row-troubleshoot"),
-        ],
-        fluid=True,
-    )
-)
-
-HTML_OTHER_PROJECTS = html.Div(
-    [
-        html.Span("other dashboard:"),
-        html.A(
-            [
-                html.Del("BMKG", style={"text-decoration-style": "double"}),
-                " 🛖 Explorer",
-            ],
-            href="https://github.com/taruma/dash-data-explorer",
-            style={"text-decoration": "none"},
-        ),
-    ],
-    className="d-flex gap-2 justify-content-center my-2",
-)
-
-HTML_MADEBY = html.Div(
-    dcc.Markdown(
-        "Made with [Dash+Plotly](https://plotly.com).",
-        className="fs-4 text-center mt-2",
-    ),
-)
-
 HTML_FOOTER = html.Div(
     html.Footer(
         [
             html.Span("\u00A9"),
-            " 2022 ",
-            # html.A(
-            #     "Taruma Sakti Megariansyah",
-            #     href="https://github.com/taruma",
-            # ),
-            # ", ",
+            " 2022-2024 ",
             html.A(
-              "PT. FIAKO ENJINIRING INDONESIA",
-              href="https://fiako.engineering",
-              target="_blank"
+                "Taruma Sakti Megariansyah",
+                href="https://dev.taruma.info",
+                target="_blank",
             ),
             ". MIT License. Visit on ",
             html.A(

@@ -1,47 +1,76 @@
+"""
+This module contains functions for generating different types of figures 
+    related to rainfall data analysis.
+"""
+
+from collections import defaultdict, OrderedDict
+from itertools import cycle, islice
+import re
+import numpy as np
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
 from dash import dcc
 from plotly.subplots import make_subplots
 from pyconfig import appConfig
-import numpy as np
-import plotly.express as px
-import plotly.graph_objects as go
 import pytemplate
-import pandas as pd
-from collections import defaultdict, OrderedDict
-from itertools import cycle, islice
 
 THRESHOLD_SUMMARY = (367 * 8) // 2
 THRESHOLD_GRAPH_RAINFALL = 365 * 8
 THRESHOLD_XAXES = 12 * 2 * 5
 THRESHOLD_STATIONS = 8
 
+LABEL_GRAPH_RAINFALL = {
+    "title": "<b>Rainfall Each Station</b>",
+    "yaxis": {"title": "<b>Rainfall (mm)</b>"},
+    "xaxis": {"title": "<b>Date</b>"},
+    "legend": {"title": "Stations"},
+}
 
-def _generate_dict_watermark(n: int = 1, source=appConfig.TEMPLATE.WATERMARK_SOURCE):
-    n = "" if n == 1 else n
-    return dict(
-        source=source,
-        xref=f"x{n} domain",
-        yref=f"y{n} domain",
-        x=0.5,
-        y=0.5,
-        sizex=0.5,
-        sizey=0.5,
-        xanchor="center",
-        yanchor="middle",
-        name="watermark-hidrokit",
-        layer="below",
-        opacity=0.1,
-    )
+current_font_color = pytemplate.FONT_COLOR_RGB_ALPHA
 
 
-LABEL_GRAPH_RAINFALL = dict(
-    title="<b>Rainfall Each Station</b>",
-    yaxis={"title": "<b>Rainfall (mm)</b>"},
-    xaxis={"title": "<b>Date</b>"},
-    legend={"title": "Stations"},
-)
+def generate_watermark(
+    subplot_number: int = 1, watermark_source=appConfig.TEMPLATE.WATERMARK_SOURCE
+):
+    """Generate a watermark for a subplot.
+
+    Args:
+        subplot_number (int, optional): The number of the subplot.
+            Defaults to 1.
+        watermark_source (str, optional): The source of the watermark.
+            Defaults to appConfig.TEMPLATE.WATERMARK_SOURCE.
+
+    Returns:
+        dict: A dictionary containing the watermark properties.
+    """
+    subplot_number = "" if subplot_number == 1 else subplot_number
+    return {
+        "source": watermark_source,
+        "xref": f"x{subplot_number} domain",
+        "yref": f"y{subplot_number} domain",
+        "x": 0.5,
+        "y": 0.5,
+        "sizex": 0.5,
+        "sizey": 0.5,
+        "xanchor": "center",
+        "yanchor": "middle",
+        "name": "watermark-hidrokit",
+        "layer": "below",
+        "opacity": 0.1,
+    }
 
 
-def figure_scatter(dataframe):
+def generate_scatter_figure(dataframe):
+    """
+    Generate a scatter plot figure based on the provided dataframe.
+
+    Parameters:
+    dataframe (pandas.DataFrame): The dataframe containing the data to be plotted.
+
+    Returns:
+    plotly.graph_objs._figure.Figure: The scatter plot figure.
+    """
 
     data = [
         go.Scatter(x=dataframe.index, y=dataframe[col], mode="lines", name=col)
@@ -54,7 +83,21 @@ def figure_scatter(dataframe):
     return fig
 
 
-def figure_bar(dataframe, barmode="stack"):
+def generate_bar_figure(dataframe, barmode="stack"):
+    """
+    Generate a bar figure based on the given dataframe.
+
+    Parameters:
+    - dataframe: pandas DataFrame
+        The input dataframe containing the data for the bar figure.
+    - barmode: str, optional
+        The mode for displaying the bars. Default is "stack".
+
+    Returns:
+    - fig: plotly Figure
+        The generated bar figure.
+
+    """
 
     if barmode == "stack":
         col_df = dataframe.columns[::-1]
@@ -80,7 +123,17 @@ def figure_bar(dataframe, barmode="stack"):
     return fig
 
 
-def figure_empty(text: str = "", size: int = 40):
+def generate_empty_figure(text: str = "", size: int = 40):
+    """
+    Generates an empty figure with optional text annotation.
+
+    Args:
+        text (str, optional): Text to be displayed as an annotation. Defaults to "".
+        size (int, optional): Font size of the annotation. Defaults to 40.
+
+    Returns:
+        go.Figure: An empty figure with the specified text annotation.
+    """
     data = [{"x": [], "y": []}]
     layout = go.Layout(
         title={"text": "", "x": 0.5},
@@ -96,19 +149,19 @@ def figure_empty(text: str = "", size: int = 40):
             "showticklabels": False,
             "zeroline": False,
         },
-        margin=dict(t=55, l=55, r=55, b=55),
+        margin={"t": 55, "l": 55, "r": 55, "b": 55},
         annotations=[
-            dict(
-                name="text",
-                text=f"<i>{text}</i>",
-                opacity=0.3,
-                font_size=size,
-                xref="x domain",
-                yref="y domain",
-                x=0.5,
-                y=0.05,
-                showarrow=False,
-            )
+            {
+                "name": "text",
+                "text": f"<i>{text}</i>",
+                "opacity": 0.3,
+                "font_size": size,
+                "xref": "x domain",
+                "yref": "y domain",
+                "x": 0.5,
+                "y": 0.05,
+                "showarrow": False,
+            }
         ],
         height=450,
     )
@@ -116,7 +169,7 @@ def figure_empty(text: str = "", size: int = 40):
     return go.Figure(data, layout)
 
 
-def figure_summary_maxsum(
+def generate_summary_maximum_sum(
     summary,
     ufunc_cols: list[str] = None,
     rows: int = 2,
@@ -125,6 +178,25 @@ def figure_summary_maxsum(
     title: str = "Summary Rainfall",
     period: str = None,
 ) -> dcc.Graph:
+    """
+    Generates a summary graph of maximum and sum values for rainfall data.
+
+    Args:
+        summary: The summary data containing rainfall information.
+        ufunc_cols (optional): A list of column names to include in the graph.
+            Defaults to ["max", "sum"].
+        rows (optional): The number of rows in the subplot grid. Defaults to 2.
+        cols (optional): The number of columns in the subplot grid. Defaults to 1.
+        subplot_titles (optional): A list of titles for each subplot.
+            Defaults to the values in ufunc_cols.
+        title (optional): The title of the graph. Defaults to "Summary Rainfall".
+        period (optional): The period of the data. Can be "monthly", "yearly", or None.
+            Defaults to None.
+
+    Returns:
+        A dcc.Graph object representing the summary graph.
+
+    """
 
     ufunc_cols = ["max", "sum"] if ufunc_cols is None else ufunc_cols
     subplot_titles = ufunc_cols if subplot_titles is None else subplot_titles
@@ -133,7 +205,8 @@ def figure_summary_maxsum(
         (summary.size > THRESHOLD_SUMMARY) or (summary.index.size > THRESHOLD_XAXES)
     ) and (period.lower() != "yearly"):
         return dcc.Graph(
-            figure=figure_empty("dataset above threshold"), config={"staticPlot": True}
+            figure=generate_empty_figure("dataset above threshold"),
+            config={"staticPlot": True},
         )
 
     fig = make_subplots(
@@ -144,11 +217,12 @@ def figure_summary_maxsum(
         subplot_titles=subplot_titles,
     )
 
-    fig.layout.images = [_generate_dict_watermark(n) for n in range(2, rows + 1)]
+    fig.layout.images = [generate_watermark(n) for n in range(2, rows + 1)]
 
     data_dict = defaultdict(list)
     stations = [station_name for station_name, _ in summary.columns.to_list()]
     stations = list(OrderedDict.fromkeys(stations))
+    last_series = None
     for station in stations:
         for ufcol, series in summary[station].items():
             if ufcol in ufunc_cols:
@@ -160,6 +234,7 @@ def figure_summary_maxsum(
                     legendgrouptitle_text=station,
                 )
                 data_dict[ufcol].append(_bar)
+            last_series = series
 
     for counter, (ufcol, data) in enumerate(data_dict.items(), 1):
         fig.add_traces(data, rows=counter, cols=cols)
@@ -175,30 +250,30 @@ def figure_summary_maxsum(
         legend={"title": "<b>Stations</b>"},
     )
 
-    ticktext = series.index.strftime("%d %b %Y")
+    ticktext = last_series.index.strftime("%d %b %Y")
 
     if period.lower() in ["monthly", "yearly"]:
         if period.lower() == "monthly":
-            ticktext = series.index.strftime("%B %Y")
+            ticktext = last_series.index.strftime("%B %Y")
         if period.lower() == "yearly":
-            ticktext = series.index.strftime("%Y")
+            ticktext = last_series.index.strftime("%Y")
 
-    if series.index.size <= THRESHOLD_XAXES:
+    if last_series.index.size <= THRESHOLD_XAXES:
         xticktext = ticktext
-        xtickvals = np.arange(series.index.size)
+        xtickvals = np.arange(last_series.index.size)
     else:
         xticktext = ticktext[::2]
-        xtickvals = np.arange(series.index.size)[::2]
+        xtickvals = np.arange(last_series.index.size)[::2]
 
-    UPDATE_XAXES = {
+    update_x_axes = {
         "ticktext": xticktext,
         "tickvals": xtickvals,
-        "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA.replace("0.4", "0.2"),
+        "gridcolor": current_font_color.replace("0.4", "0.2"),
         "gridwidth": 2,
     }
 
-    UPDATE_YAXES = {
-        "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA.replace("0.4", "0.2"),
+    update_y_axes = {
+        "gridcolor": current_font_color.replace("0.4", "0.2"),
         "gridwidth": 2,
         "fixedrange": True,
         "title": "<b>Rainfall (mm)</b>",
@@ -209,7 +284,7 @@ def figure_summary_maxsum(
         fig.update(layout={f"{axis}axis{n}": update})
 
     for n_row in range(1, rows + 1):
-        for axis, update in zip(["x", "y"], [UPDATE_XAXES, UPDATE_YAXES]):
+        for axis, update in zip(["x", "y"], [update_x_axes, update_y_axes]):
             update_axis(fig, update, n_row, axis)
 
     # ref: https://stackoverflow.com/questions/39863250
@@ -229,7 +304,7 @@ def figure_summary_maxsum(
     return dcc.Graph(figure=fig)
 
 
-def figure_summary_raindry(
+def generate_summary_rain_dry(
     summary: pd.DataFrame,
     ufunc_cols: list[str] = None,
     rows: int = None,
@@ -238,7 +313,23 @@ def figure_summary_raindry(
     title: str = "Summary Rainfall",
     period: str = None,
 ) -> dcc.Graph:
+    """
+    Generates a summary graph of rainfall and dry days.
 
+    Args:
+        summary (pd.DataFrame): The summary data containing rainfall and dry day information.
+        ufunc_cols (list[str], optional): The columns to include in the graph.
+            Defaults to ["n_rain", "n_dry"].
+        rows (int, optional): The number of rows in the graph. Defaults to None.
+        cols (int, optional): The number of columns in the graph. Defaults to 1.
+        subplot_titles (list[str], optional): The titles for each subplot. Defaults to None.
+        title (str, optional): The title of the graph. Defaults to "Summary Rainfall".
+        period (str, optional): The period of the data (e.g., "monthly", "yearly").
+            Defaults to None.
+
+    Returns:
+        dcc.Graph: The generated graph.
+    """
     rows = summary.columns.levels[0].size if rows is None else rows
 
     ufunc_cols = ["n_rain", "n_dry"] if ufunc_cols is None else ufunc_cols
@@ -250,7 +341,8 @@ def figure_summary_raindry(
         (summary.size > THRESHOLD_SUMMARY) or (summary.index.size > THRESHOLD_XAXES)
     ) and (period.lower() != "yearly"):
         return dcc.Graph(
-            figure=figure_empty("dataset above threshold"), config={"staticPlot": True}
+            figure=generate_empty_figure("dataset above threshold"),
+            config={"staticPlot": True},
         )
 
     vertical_spacing = 0.2 / rows
@@ -263,7 +355,7 @@ def figure_summary_raindry(
         subplot_titles=subplot_titles,
     )
 
-    fig.layout.images = [_generate_dict_watermark(n) for n in range(2, rows + 1)]
+    fig.layout.images = [generate_watermark(n) for n in range(2, rows + 1)]
 
     for station in summary.columns.levels[0]:
         summary[(station, "n_left")] = (
@@ -275,6 +367,7 @@ def figure_summary_raindry(
     data_dict = defaultdict(list)
     stations = [station_name for station_name, _ in summary.columns.to_list()]
     stations = list(OrderedDict.fromkeys(stations))
+    last_series = None
     for station in stations:
         for ufcol, series in summary[station].items():
             if ufcol in ufunc_cols + ["n_left"]:
@@ -304,6 +397,7 @@ def figure_summary_raindry(
                         legendrank=500,
                     )
                     data_dict[station].append(_bar)
+            last_series = series
 
     for counter, (ufcol, data) in enumerate(data_dict.items(), 1):
         fig.add_traces(data, rows=counter, cols=cols)
@@ -318,32 +412,32 @@ def figure_summary_raindry(
         legend={"title": "<b>Stations</b>"},
     )
 
-    ticktext = series.index.strftime("%d %b %Y")
+    ticktext = last_series.index.strftime("%d %b %Y")
 
     if period.lower() in ["monthly", "yearly"]:
         if period.lower() == "monthly":
-            ticktext = series.index.strftime("%B %Y")
+            ticktext = last_series.index.strftime("%B %Y")
         if period.lower() == "yearly":
-            ticktext = series.index.strftime("%Y")
+            ticktext = last_series.index.strftime("%Y")
 
-    if series.index.size <= THRESHOLD_XAXES:
+    if last_series.index.size <= THRESHOLD_XAXES:
         xticktext = ticktext
-        xtickvals = np.arange(series.index.size)
+        xtickvals = np.arange(last_series.index.size)
     else:
         xticktext = ticktext[::2]
-        xtickvals = np.arange(series.index.size)[::2]
+        xtickvals = np.arange(last_series.index.size)[::2]
 
-    UPDATE_XAXES = {
+    update_x_axes = {
         "ticktext": xticktext,
         "tickvals": xtickvals,
-        "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA.replace("0.4", "0.1"),
+        "gridcolor": current_font_color.replace("0.4", "0.1"),
         "gridwidth": 2,
         # "nticks": 2,
         "ticklabelstep": 2,
     }
 
-    UPDATE_YAXES = {
-        "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA.replace("0.4", "0.1"),
+    update_y_axes = {
+        "gridcolor": current_font_color.replace("0.4", "0.1"),
         "gridwidth": 2,
         "fixedrange": True,
         "title": "<b>Days</b>",
@@ -357,7 +451,7 @@ def figure_summary_raindry(
     fig.update(layout={f"xaxis{rows}": {"title": "<b>Date</b>"}})
 
     for n_row in range(1, rows + 1):
-        for axis, update in zip(["x", "y"], [UPDATE_XAXES, UPDATE_YAXES]):
+        for axis, update in zip(["x", "y"], [update_x_axes, update_y_axes]):
             update_axis(fig, update, n_row, axis)
 
     color_list = list(pytemplate.hktemplate.layout.colorway[:2]) + ["DarkGray"]
@@ -368,7 +462,7 @@ def figure_summary_raindry(
     return dcc.Graph(figure=fig)
 
 
-def figure_summary_maxdate(
+def generate_summary_maximum_date(
     summary_all: pd.DataFrame,
     ufunc_col: list[str] = None,
     rows: int = 3,
@@ -378,7 +472,25 @@ def figure_summary_maxdate(
     periods: list[str] = None,
     bubble_sizes: list[int] = None,
 ):
+    """
+    Generates a summary graph of maximum rainfall events.
 
+    Args:
+        summary_all (pd.DataFrame): The summary data containing rainfall information.
+        ufunc_col (list[str], optional): The columns to use for calculations.
+            Defaults to None.
+        rows (int, optional): The number of rows in the subplot grid. Defaults to 3.
+        cols (int, optional): The number of columns in the subplot grid. Defaults to 1.
+        subplot_titles (list[str], optional): The titles for each subplot. Defaults to None.
+        title (str, optional): The title of the graph. Defaults to "Maximum Rainfall Events".
+        periods (list[str], optional): The periods to consider for the analysis.
+            Defaults to None.
+        bubble_sizes (list[int], optional): The sizes of the bubbles in the graph.
+            Defaults to None.
+
+    Returns:
+        dcc.Graph: The generated graph.
+    """
     ufunc_col = ["max_date"] if ufunc_col is None else ufunc_col
     subplot_titles = (
         ["Biweekly", "Monthly", "Yearly"] if subplot_titles is None else subplot_titles
@@ -393,7 +505,7 @@ def figure_summary_maxdate(
         subplot_titles=subplot_titles,
     )
 
-    fig.layout.images = [_generate_dict_watermark(n) for n in range(2, rows + 1)]
+    fig.layout.images = [generate_watermark(n) for n in range(2, rows + 1)]
 
     # Create new DF
 
@@ -461,23 +573,23 @@ def figure_summary_maxdate(
     fig.update(layout={f"xaxis{rows}": {"title": "<b>Date</b>"}})
 
     # GENERAL UPDATE
-    UPDATE_XAXES = {
-        "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA.replace("0.4", "0.1"),
+    update_x_axes = {
+        "gridcolor": current_font_color.replace("0.4", "0.1"),
         "gridwidth": 2,
         "showspikes": True,
         "spikesnap": "cursor",
         "spikemode": "across",
         "spikethickness": 1,
     }
-    UPDATE_YAXES = {
-        "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA.replace("0.4", "0.1"),
+    update_y_axes = {
+        "gridcolor": current_font_color.replace("0.4", "0.1"),
         "gridwidth": 2,
         "fixedrange": True,
         "title": "<b>Station</b>",
     }
 
     for n_row in range(1, rows + 1):
-        for axis, update in zip(["x", "y"], [UPDATE_XAXES, UPDATE_YAXES]):
+        for axis, update in zip(["x", "y"], [update_x_axes, update_y_axes]):
             update_axis(fig, update, n_row, axis)
 
     n_data = len(fig.data)
@@ -495,17 +607,30 @@ def figure_summary_maxdate(
     return dcc.Graph(figure=fig)
 
 
-def figure_cumsum_single(cumsum: pd.DataFrame, col: str = None) -> go.Figure:
-    import re
+def generate_cumulative_sum(
+    cumulative_sum_df: pd.DataFrame, data_column: str = None
+) -> go.Figure:
+    """
+    Generates a cumulative sum plot using the provided DataFrame.
 
-    col = cumsum.columns[0] if col is None else col
+    Args:
+        cumulative_sum_df (pd.DataFrame): The DataFrame containing the cumulative sum data.
+        data_column (str, optional): The column name to use for the y-axis data.
+            If not provided, the first column of the DataFrame will be used.
 
-    new_dataframe = cumsum.copy()
+    Returns:
+        go.Figure: The generated cumulative sum plot as a Plotly Figure.
+
+    """
+
+    data_column = cumulative_sum_df.columns[0] if data_column is None else data_column
+
+    new_dataframe = cumulative_sum_df.copy()
     new_dataframe["number"] = np.arange(1, len(new_dataframe) + 1)
 
     fig = px.scatter(
         x=new_dataframe.number,
-        y=new_dataframe[col],
+        y=new_dataframe[data_column],
         trendline="ols",
         trendline_color_override=pytemplate.hktemplate.layout.colorway[1],
     )
@@ -518,9 +643,9 @@ def figure_cumsum_single(cumsum: pd.DataFrame, col: str = None) -> go.Figure:
     _scatter.line.width = 1
     _scatter.marker.size = 12
     _scatter.marker.symbol = "circle"
-    _scatter.name = col
+    _scatter.name = data_column
     _scatter.hovertemplate = (
-        f"{col}<br><b>%{{y}} mm</b><br><i>%{{x}}</i><extra></extra>"
+        f"{data_column}<br><b>%{{y}} mm</b><br><i>%{{x}}</i><extra></extra>"
     )
 
     # MODIFIED TRENDLINE
@@ -556,15 +681,26 @@ def figure_cumsum_single(cumsum: pd.DataFrame, col: str = None) -> go.Figure:
     return dcc.Graph(figure=fig)
 
 
-def figure_consistency(cumsum: pd.DataFrame, col: str) -> go.Figure:
-    import re
+def generate_scatter_with_trendline(
+    cumulative_sum_df: pd.DataFrame, data_column: str
+) -> go.Figure:
+    """
+    Generate a scatter plot with a trendline.
 
-    cumsum = cumsum.copy()
+    Args:
+        cumulative_sum_df (pd.DataFrame): The cumulative sum dataframe.
+        data_column (str): The column name for the data.
+
+    Returns:
+        go.Figure: The scatter plot figure with a trendline.
+    """
+
+    cumulative_sum_df = cumulative_sum_df.copy()
 
     # Create Mean Cumulative Other Stations
-    cumsum_x = cumsum[col]
-    other_stations = cumsum.columns.drop(col)
-    cumsum_y = cumsum[other_stations].mean(axis=1)
+    cumsum_x = cumulative_sum_df[data_column]
+    other_stations = cumulative_sum_df.columns.drop(data_column)
+    cumsum_y = cumulative_sum_df[other_stations].mean(axis=1)
 
     fig = px.scatter(
         x=cumsum_x,
@@ -581,9 +717,9 @@ def figure_consistency(cumsum: pd.DataFrame, col: str) -> go.Figure:
     _scatter.line.width = 1
     _scatter.marker.size = 12
     _scatter.marker.symbol = "circle"
-    _scatter.name = col
+    _scatter.name = data_column
     _scatter.hovertemplate = (
-        f"{col}<br><b>y: %{{y}} mm<br><i>x: %{{x}} mm</i></b><extra></extra>"
+        f"{data_column}<br><b>y: %{{y}} mm<br><i>x: %{{x}} mm</i></b><extra></extra>"
     )
 
     # MODIFIED TRENDLINE
@@ -608,7 +744,7 @@ def figure_consistency(cumsum: pd.DataFrame, col: str) -> go.Figure:
     _trendline.name = "trendline"
 
     fig.update_layout(
-        xaxis_title=f"<b>Cumulative Annual {col} (mm)</b>",
+        xaxis_title=f"<b>Cumulative Annual {data_column} (mm)</b>",
         yaxis_title="<b>Cumulative Average Annual References (mm)</b>",
         margin=dict(l=0, t=35, b=0, r=0),
         yaxis_tickformat=".0f",
