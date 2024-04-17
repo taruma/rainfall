@@ -1,12 +1,15 @@
+"""Main Dash App for Rainfall Analysis"""
+
+from itertools import product
+from pathlib import Path
+from dash import dcc, html, Input, Output, State
+import pandas as pd
 import dash
 import dash_bootstrap_components as dbc
-import pandas as pd
 import plotly.io as pio
-import pyfigure, pyfunc, pylayout, pylayoutfunc
-from dash import dcc, html, Input, Output, State
-from pathlib import Path
 from pyconfig import appConfig
 from pytemplate import hktemplate
+import pyfigure, pyfunc, pylayout, pylayoutfunc  # pylint: disable=multiple-imports
 
 pio.templates.default = hktemplate
 
@@ -17,14 +20,14 @@ DEBUG = appConfig.DASH_APP.DEBUG
 
 # BOOTSRAP THEME
 THEME = appConfig.DASH_THEME.THEME
-dbc_css = (
+DBC_CSS = (
     "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.1.2/dbc.min.css"
 )
 
 # APP
 app = dash.Dash(
     APP_TITLE,
-    external_stylesheets=[getattr(dbc.themes, THEME), dbc_css],
+    external_stylesheets=[getattr(dbc.themes, THEME), DBC_CSS],
     title=APP_TITLE,
     update_title=UPDATE_TITLE,
     meta_tags=[
@@ -77,6 +80,8 @@ app.layout = dbc.Container(
     prevent_initial_call=True,
 )
 def callback_upload(content, filename, filedate, _b1, _b2, _b3, _b4):
+    """Callback for uploading data and displaying the table."""
+
     ctx = dash.callback_context
 
     if content is not None:
@@ -142,6 +147,8 @@ def callback_upload(content, filename, filedate, _b1, _b2, _b3, _b4):
     prevent_initial_call=True,
 )
 def callback_visualize(_, table_data, table_columns, graphbar_opt):
+    """Callback for visualizing the rainfall data."""
+
     dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
 
     row_download_table_style = {"visibility": "visible"}
@@ -177,6 +184,7 @@ def callback_visualize(_, table_data, table_columns, graphbar_opt):
     prevent_initial_call=True,
 )
 def callback_download_table(_, table_data, table_columns):
+    """Callback for downloading the table data."""
     dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
     return dcc.send_data_frame(dataframe.to_csv, "derived_table.csv")
 
@@ -194,6 +202,7 @@ def callback_download_table(_, table_data, table_columns):
     prevent_initial_call=True,
 )
 def callback_analyze(_, table_data, table_columns):
+    """Callback for analyzing the rainfall data."""
 
     button_viz_analysis_disabled = True
     button_viz_analysis_outline = True
@@ -231,8 +240,12 @@ def callback_analyze(_, table_data, table_columns):
         button_viz_analysis_disabled = False
         button_viz_analysis_outline = False
         row_button_download_analysis_style = {"visibility": "visible"}
-    except Exception as e:
-        children = html.Div(f"SOMETHING ERROR {e}")
+    except (TypeError, ValueError) as e:
+        children = html.Div(
+            f"Input data or columns are not in the expected format: {e}"
+        )
+    except KeyError as e:
+        children = html.Div(f"Dataframe does not have the expected columns: {e}")
 
     return [
         children,
@@ -266,6 +279,7 @@ def callback_download_results(
     cumsum_data,
     cumsum_columns,
 ):
+    """Callback for downloading the analysis results."""
 
     biweekly = (biweekly_data, biweekly_columns)
     monthly = (monthly_data, monthly_columns)
@@ -322,7 +336,7 @@ def callback_graph_analysis(
     cumsum_data,
     cumsum_columns,
 ):
-    from itertools import product
+    """Callback for generating the analysis graphs."""
 
     label_periods = ["Biweekly", "Monthly", "Yearly"]
     label_maxsum = ["Max + Sum"]
@@ -405,15 +419,6 @@ def callback_graph_analysis(
         )
 
     return children_analysis, children_cumsum, children_consistency
-
-
-@app.callback(
-    Output("row-troubleshoot", "children"),
-    Input("button-troubleshoot", "n_clicks"),
-    prevent_initial_call=True,
-)
-def _callback_troubleshoot(_):
-    return html.Div("troubleshoot")
 
 
 if __name__ == "__main__":

@@ -60,7 +60,7 @@ DCC_UPLOAD = html.Div(
         children=html.Div(
             [
                 dbc.Button(
-                    "Upload File",
+                    "Upload File (.csv)",
                     color="primary",
                     outline=False,
                     class_name="fs-4 text-center",
