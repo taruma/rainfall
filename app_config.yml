@@ -1,7 +1,7 @@
 DASH_APP:
   APP_TITLE: Rainfall Data Explorer
   UPDATE_TITLE: Updating...
-  DEBUG: False
+  DEBUG: TRUE
 
 DASH_THEME:
   THEME: COSMO
@@ -12,6 +12,6 @@ TEMPLATE:
   SHOW_LEGEND_INSIDE: False
   SHOW_RANGESELECTOR: False
 
-VERSION: v1.3.0
-GITHUB_LINK: https://github.com/fiakoenjiniring/rainfall
-GITHUB_REPO: fiakoenjiniring/rainfall
+VERSION: v1.4.0
+GITHUB_LINK: https://github.com/taruma/rainfall
+GITHUB_REPO: taruma/rainfall
