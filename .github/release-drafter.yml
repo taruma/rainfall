@@ -1,0 +1,46 @@
+name-template: '$RESOLVED_VERSION'
+tag-template: '$RESOLVED_VERSION'
+categories:
+  - title: '🚀 New Features'
+    labels:
+      - 'feature'
+  - title: '✨ Enhancements'
+    labels:
+      - 'enhancement'
+  - title: '🐛 Bug Fixes'
+    labels:
+      - 'bug'
+  - title: '📃 Documentation'
+    labels:
+      - 'docs'
+      - 'documentation'
+  - title: '🖥️ Website'
+    labels:
+      - 'site'
+  - title: '📎 Github'
+    labels:
+      - 'github'
+exclude-labels:
+  - 'ask'
+
+change-template: '- (#$NUMBER) | $TITLE @$AUTHOR'
+change-title-escapes: '\<*_&'
+
+version-resolver:
+  major:
+    labels:
+      - 'major'
+  minor:
+    labels:
+      - 'minor'
+  patch:
+    labels:
+      - 'patch'
+  default: patch
+
+template: |
+  ## Changes
+  $CHANGES
+
+  ## Contributors
+  $CONTRIBUTORS
