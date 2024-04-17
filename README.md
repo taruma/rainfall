@@ -3,14 +3,13 @@
 <div align="center">
 <img src="./_readme/fiakodev-rainfall-thumbnail.png" alt="hidrokit-rainfall thumbnail"><br>
 
-<img alt="developed by" src="https://img.shields.io/badge/developed%20by-taruma%20%26%20fiakodev-orange">
-<img alt="project by" src="https://img.shields.io/badge/project%20by-taruma%20%26%20PT.%20FIAKO%20ENJINIRING%20INDONESIA-blue">
-<img alt="License" src="https://img.shields.io/github/license/fiakoenjiniring/rainfall.svg">
+<img alt="developed by" src="https://img.shields.io/badge/developed%20by-taruma-orange">
+<img alt="License" src="https://img.shields.io/github/license/taruma/rainfall.svg">
 <br>
-<img alt="GitHub release" src="https://img.shields.io/github/release/fiakoenjiniring/rainfall.svg?logo=github">
-<img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/fiakoenjiniring/rainfall.svg?logo=github"><br>
+<img alt="GitHub release" src="https://img.shields.io/github/release/taruma/rainfall.svg?logo=github">
+<img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/taruma/rainfall.svg?logo=github"><br>
 
-<a href="https://github.com/fiakoenjiniring/rainfall" target="_blank"><strong>Github Repository</strong></a> // <code>fiakoenjiniring/rainfall</code><br>
+<a href="https://github.com/taruma/rainfall" target="_blank"><strong>Github Repository</strong></a> // <code>taruma/rainfall</code><br>
 <a href="https://hidrokit-rainfall.herokuapp.com" target="_blank"><strong>Aplikasi</strong></a> // <code>hidrokit-rainfall.herokuapp.com</code><br>
 <a href="https://youtu.be/IhjSoYlHW04" target="_blank"><strong>Presentasi & Demonstrasi</strong></a>
 </div>
@@ -89,7 +88,8 @@ Berikut daftar kekurangan atau _known issues_ aplikasi ini:
 [MIT LICENSE](./LICENSE)
 
 ```
-Copyright ©️ 2022 Taruma Sakti Megariansyah, PT. FIAKO ENJINIRING INDONESIA
+Copyright ©️ 2022 PT. FIAKO ENJINIRING INDONESIA
+Copyright ©️ 2022-2024 Taruma Sakti Megariansyah
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
