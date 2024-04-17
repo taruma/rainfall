@@ -1,3 +1,10 @@
+"""
+This module contains functions for parsing and processing uploaded data, 
+    generating summary statistics for rainfall data, 
+    transforming table data into a pandas DataFrame, 
+    and calculating the cumulative sum of a DataFrame.
+"""
+
 import base64
 import io
 import pandas as pd
@@ -7,6 +14,24 @@ from hidrokit.contrib.taruma import hk98
 
 
 def parse_upload_data(content, filename, filedate):
+    """
+    Parse and process uploaded data.
+
+    Args:
+        content (str): The content of the uploaded file.
+        filename (str): The name of the uploaded file.
+        filedate (str): The date of the uploaded file.
+
+    Returns:
+        tuple: A tuple containing the processed data and an HTML element.
+            The processed data is a pandas DataFrame if the file is in CSV format.
+            If the file is in XLSX or XLS format, an HTML element with a warning message
+                is returned.
+            If the file is in any other format, an HTML element with an error message
+                is returned.
+    """
+
+    _ = filedate  # unused variable
     _, content_string = content.split(",")
 
     decoded = base64.b64decode(content_string)
@@ -34,18 +59,37 @@ def parse_upload_data(content, filename, filedate):
                 ),
                 None,
             )
-    except Exception as e:
+    except UnicodeDecodeError as e:
         print(e)
-        return html.Div([f"There was an error processing this file. {e}"]), None
+        return html.Div([f"File is not valid UTF-8. {e}"]), None
+    except pd.errors.ParserError as e:
+        print(e)
+        return html.Div([f"CSV file is not well-formed. {e}"]), None
+    except ValueError as e:
+        print(e)
+        return html.Div([f"Content string is not valid base64. {e}"]), None
 
     return html.Div(["File Diterima"]), dataframe
 
 
 def generate_summary_single(dataframe, n_days="1MS"):
+    """
+    Generate a summary of rainfall data for a single location.
+
+    Args:
+        dataframe (pandas.DataFrame): The input dataframe containing rainfall data.
+        n_days (str, optional): The number of days to consider for the summary.
+            Defaults to "1MS".
+
+    Returns:
+        pandas.DataFrame: The summary dataframe containing various statistics of
+            the rainfall data.
+    """
+
     def days(vector):
         return len(vector)
 
-    def sum(vector):
+    def vector_sum(vector):
         return vector.sum().round(3)
 
     def n_rain(vector):
@@ -57,13 +101,12 @@ def generate_summary_single(dataframe, n_days="1MS"):
     def max_date(vector):
         if vector.any():
             return vector.idxmax().date()
-        else:
-            return pd.NaT
+        return pd.NaT
 
-    def max(vector):
+    def vector_max(vector):
         return vector.max()
 
-    ufunc = [days, max, sum, n_rain, n_dry, max_date]
+    ufunc = [days, vector_max, vector_sum, n_rain, n_dry, max_date]
     ufunc_col = ["days", "max", "sum", "n_rain", "n_dry", "max_date"]
 
     summary = hk98.summary_all(
@@ -74,6 +117,19 @@ def generate_summary_single(dataframe, n_days="1MS"):
 
 
 def generate_summary_all(dataframe, n_days: list = None):
+    """
+    Generate summary statistics for multiple time periods.
+
+    Args:
+        dataframe (pandas.DataFrame): The input dataframe containing the data.
+        n_days (list, optional): A list of time periods to calculate
+            the summary statistics for.
+            If not provided, the default time periods ["16D", "1MS", "1YS"] will be used.
+
+    Returns:
+        list: A list of summary statistics for each time period.
+
+    """
     n_days = ["16D", "1MS", "1YS"] if n_days is None else n_days
 
     summary_all = []
@@ -90,6 +146,22 @@ def transform_to_dataframe(
     apply_numeric: bool = True,
     parse_dates: list = None,
 ):
+    """
+    Transform table data into a pandas DataFrame.
+
+    Args:
+        table_data (list): The data to be transformed into a DataFrame.
+        table_columns (list): The column names of the table data.
+        multiindex (bool, optional): Whether to create a multi-index DataFrame.
+            Defaults to False.
+        apply_numeric (bool, optional): Whether to apply numeric conversion to the DataFrame.
+            Defaults to True.
+        parse_dates (list, optional): The column names to parse as dates.
+            Defaults to None.
+
+    Returns:
+        pandas.DataFrame: The transformed DataFrame.
+    """
 
     if multiindex is True:
         dataframe = pd.DataFrame(table_data)
@@ -133,8 +205,16 @@ def transform_to_dataframe(
     return dataframe
 
 
-def calc_cumsum(dataframe):
+def calculate_cumulative_sum(dataframe):
+    """
+    Calculate the cumulative sum of a DataFrame by resampling it on a yearly basis.
 
+    Parameters:
+    dataframe (pandas.DataFrame): The input DataFrame containing the data.
+
+    Returns:
+    pandas.DataFrame: The DataFrame with the cumulative sum rounded to the nearest integer.
+    """
     consistency = dataframe.resample("YS").sum().cumsum()
 
     return consistency.round()

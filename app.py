@@ -212,7 +212,7 @@ def callback_analyze(_, table_data, table_columns):
         ]
 
         # CUMUMLATIVE SUM
-        cumsum = pyfunc.calc_cumsum(dataframe)
+        cumsum = pyfunc.calculate_cumulative_sum(dataframe)
 
         _, table_cumsum = pylayoutfunc.create_table_layout(
             cumsum, "table-cumsum", deletable=False
@@ -375,7 +375,8 @@ def callback_graph_analysis(
     cumsum = pyfunc.transform_to_dataframe(cumsum_data, cumsum_columns)
 
     graph_cumsum = [
-        pyfigure.generate_cumulative_sum(cumsum, data_column=station) for station in cumsum.columns
+        pyfigure.generate_cumulative_sum(cumsum, data_column=station)
+        for station in cumsum.columns
     ]
 
     children_cumsum = pylayoutfunc.create_tabcard_graph_layout(
@@ -387,7 +388,9 @@ def callback_graph_analysis(
     if cumsum.columns.size == 1:
         children_consistency = (
             dcc.Graph(
-                figure=pyfigure.generate_empty_figure(text="Not Available for Single Station"),
+                figure=pyfigure.generate_empty_figure(
+                    text="Not Available for Single Station"
+                ),
                 config={"staticPlot": True},
             ),
         )
