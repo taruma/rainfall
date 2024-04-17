@@ -88,8 +88,8 @@ Berikut daftar kekurangan atau _known issues_ aplikasi ini:
 [MIT LICENSE](./LICENSE)
 
 ```
-Copyright ©️ 2022 PT. FIAKO ENJINIRING INDONESIA
 Copyright ©️ 2022-2024 Taruma Sakti Megariansyah
+Copyright ©️ 2022 PT. FIAKO ENJINIRING INDONESIA
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
