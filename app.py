@@ -18,7 +18,7 @@ DEBUG = appConfig.DASH_APP.DEBUG
 # BOOTSRAP THEME
 THEME = appConfig.DASH_THEME.THEME
 dbc_css = (
-    "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.4/dbc.min.css"
+    "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.1.2/dbc.min.css"
 )
 
 # APP
@@ -39,6 +39,7 @@ app.layout = dbc.Container(
         pylayout.HTML_TITLE,
         pylayout.HTML_ALERT_README,
         pylayout.HTML_ROW_BUTTON_UPLOAD,
+        pylayout.HTML_ROW_BUTTON_EXAMPLE,
         pylayout.HTML_ROW_TABLE,
         pylayout.HTML_ROW_BUTTON_VIZ,
         pylayout.HTML_ROW_OPTIONS_GRAPH_RAINFALL,
@@ -49,11 +50,11 @@ app.layout = dbc.Container(
         pylayout.HTML_ROW_GRAPH_ANALYSIS,
         pylayout.HTML_ROW_GRAPH_CUMSUM,
         pylayout.HTML_ROW_GRAPH_CONSISTENCY,
-        # pylayout.HTML_MADEBY,
+        html.Hr(),
         pylayout.HTML_SUBTITLE,
         pylayout.HTML_FOOTER,
     ],
-    fluid=True,
+    fluid=False,
     className="dbc",
 )
 
@@ -69,19 +70,30 @@ app.layout = dbc.Container(
     Input("dcc-upload", "contents"),
     State("dcc-upload", "filename"),
     State("dcc-upload", "last_modified"),
-    Input("button-skip", "n_clicks"),
+    Input("button-example-1", "n_clicks"),
+    Input("button-example-2", "n_clicks"),
+    Input("button-example-3", "n_clicks"),
+    Input("button-example-4", "n_clicks"),
     prevent_initial_call=True,
 )
-def callback_upload(content, filename, filedate, _):
+def callback_upload(content, filename, filedate, _b1, _b2, _b3, _b4):
     ctx = dash.callback_context
 
     if content is not None:
         children, dataframe = pyfunc.parse_upload_data(content, filename, filedate)
 
-    if ctx.triggered[0]["prop_id"] == "button-skip.n_clicks":
-        dataframe = pd.read_csv(
-            Path(r"./example_7Y5S.csv"), index_col=0, parse_dates=True
-        )
+    example_data = {
+        "button-example-1.n_clicks": r"./example_7Y5S.csv",
+        "button-example-2.n_clicks": r"./example_2Y4S_named.csv",
+        "button-example-3.n_clicks": r"./example_9Y1S_named.csv",
+        "button-example-4.n_clicks": r"./example_1Y7S_named.csv",
+    }
+
+    context_trigger_prop_id = ctx.triggered[0]["prop_id"]
+
+    if context_trigger_prop_id in example_data:
+        example_file = example_data[context_trigger_prop_id]
+        dataframe = pd.read_csv(Path(example_file), index_col=0, parse_dates=True)
         filename = None
         filedate = None
 
