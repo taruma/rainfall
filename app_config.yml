@@ -1,7 +1,7 @@
 DASH_APP:
   APP_TITLE: Rainfall Data Explorer
   UPDATE_TITLE: Updating...
-  DEBUG: TRUE
+  DEBUG: FALSE
 
 DASH_THEME:
   THEME: ZEPHYR
