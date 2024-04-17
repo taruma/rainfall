@@ -10,7 +10,7 @@ import io
 import pandas as pd
 from dash import html
 import numpy as np
-from hidrokit.contrib.taruma import hk98
+from hidrokit.contrib.taruma import statistic_summary
 
 
 def parse_upload_data(content, filename, filedate):
@@ -109,7 +109,7 @@ def generate_summary_single(dataframe, n_days="1MS"):
     ufunc = [days, vector_max, vector_sum, n_rain, n_dry, max_date]
     ufunc_col = ["days", "max", "sum", "n_rain", "n_dry", "max_date"]
 
-    summary = hk98.summary_all(
+    summary = statistic_summary.summary_all(
         dataframe, ufunc=ufunc, ufunc_col=ufunc_col, n_days=n_days
     )
 
