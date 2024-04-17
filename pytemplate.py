@@ -1,8 +1,9 @@
 """TEMPLATE PLOTLY BASED ON THEME"""
+
 import plotly.io as pio
 from dash_bootstrap_templates import load_figure_template
-from pyconfig import appConfig
 from plotly import colors
+from pyconfig import appConfig
 
 load_figure_template(appConfig.DASH_THEME.THEME.lower())
 hktemplate = pio.templates[pio.templates.default]
@@ -10,27 +11,27 @@ hktemplate = pio.templates[pio.templates.default]
 # VARS
 _TEMPLATE = appConfig.TEMPLATE
 _FONT_FAMILY = hktemplate.layout.font.family
-_FONT_COLOR_TUPLE = colors.hex_to_rgb(hktemplate.layout.font.color)
-_FONT_COLOR_RGB_ALPHA = "rgba({},{},{},0.4)".format(*_FONT_COLOR_TUPLE)
+_RED, _GREEN, _BLUE = colors.hex_to_rgb(hktemplate.layout.font.color)
+_FONT_COLOR_RGB_ALPHA = f"rgba({_RED},{_GREEN},{_BLUE},0.4)"
 
 ## LAYOUT
 # WATERMARK
 _SOURCE_WATERMARK = _TEMPLATE.WATERMARK_SOURCE
 hktemplate.layout.images = [
-    dict(
-        source=_SOURCE_WATERMARK,
-        xref="x domain",
-        yref="y domain",
-        x=0.5,
-        y=0.5,
-        sizex=0.5,
-        sizey=0.5,
-        xanchor="center",
-        yanchor="middle",
-        name="watermark-hidrokit",
-        layer="below",
-        opacity=0.1,
-    ),
+    {
+        "source": _SOURCE_WATERMARK,
+        "xref": "x domain",
+        "yref": "y domain",
+        "x": 0.5,
+        "y": 0.5,
+        "sizex": 0.5,
+        "sizey": 0.5,
+        "xanchor": "center",
+        "yanchor": "middle",
+        "name": "watermark-hidrokit",
+        "layer": "below",
+        "opacity": 0.1,
+    },
 ]
 
 ## GENERAL
@@ -51,7 +52,7 @@ hktemplate.layout.legend.groupclick = "toggleitem"
 # hktemplate.layout.legend.title.text = "<b>placeholder</b>"
 
 
-def apply_legend_inside():
+def _apply_legend_inside():
     hktemplate.layout.legend.xanchor = "left"
     hktemplate.layout.legend.yanchor = "top"
     hktemplate.layout.legend.x = 0.005
@@ -63,7 +64,7 @@ def apply_legend_inside():
 
 
 if _TEMPLATE.SHOW_LEGEND_INSIDE:
-    apply_legend_inside()
+    _apply_legend_inside()
 
 # MODEBAR
 hktemplate.layout.modebar.activecolor = "blue"
@@ -107,47 +108,51 @@ hktemplate.layout.xaxis.gridwidth = _XAXIS_LINEWIDTH
 hktemplate.layout.xaxis.title.font.size = _XAXIS_TITLE_FONT_SIZE
 hktemplate.layout.xaxis.title.standoff = _XAXIS_TITLE_STANDOFF
 
+
 # RANGESELECTOR XAXIS
-def apply_rangeselector():
+def _apply_rangeselector():
     hktemplate.layout.xaxis.rangeselector.buttons = [
-        dict(
-            count=1,
-            label="1m",
-            step="month",
-            stepmode="backward",
-            visible=True,
-            name="button1",
-        ),
-        dict(
-            count=6,
-            label="6m",
-            step="month",
-            stepmode="backward",
-            visible=True,
-            name="button2",
-        ),
-        dict(
-            count=1,
-            label="YTD",
-            step="year",
-            stepmode="todate",
-            visible=True,
-            name="button3",
-        ),
-        dict(
-            count=1,
-            label="1y",
-            step="year",
-            stepmode="backward",
-            visible=True,
-            name="button4",
-        ),
-        dict(step="all", name="button5"),
+        {
+            "count": 1,
+            "label": "1m",
+            "step": "month",
+            "stepmode": "backward",
+            "visible": True,
+            "name": "button1",
+        },
+        {
+            "count": 6,
+            "label": "6m",
+            "step": "month",
+            "stepmode": "backward",
+            "visible": True,
+            "name": "button2",
+        },
+        {
+            "count": 1,
+            "label": "YTD",
+            "step": "year",
+            "stepmode": "todate",
+            "visible": True,
+            "name": "button3",
+        },
+        {
+            "count": 1,
+            "label": "1y",
+            "step": "year",
+            "stepmode": "backward",
+            "visible": True,
+            "name": "button4",
+        },
+        {
+            "step": "all",
+            "name": "button5",
+        },
     ]
 
 
 if _TEMPLATE.SHOW_RANGESELECTOR:
-    apply_rangeselector()
+    _apply_rangeselector()
 
 # YAXIS
 _YAXIS_GRIDCOLOR = "black"  # hktemplate.layout.yaxis.gridcolor
