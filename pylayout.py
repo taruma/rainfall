@@ -52,7 +52,7 @@ ALERT_README = dbc.Alert(
     className="m-4",
 )
 
-HTML_ALERT_README = pylayoutfunc.create_HTML_alert(ALERT_README, className=None)
+HTML_ALERT_README = pylayoutfunc.create_html_alert(ALERT_README, class_name=None)
 
 DCC_UPLOAD = html.Div(
     dcc.Upload(
