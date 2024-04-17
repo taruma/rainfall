@@ -164,7 +164,7 @@ HTML_ROW_TABLE = html.Div(
                 dbc.CardBody(
                     id="row-table-uploaded",
                     children=dcc.Graph(
-                        figure=pyfigure.figure_empty(),
+                        figure=pyfigure.generate_empty_figure(),
                         config={"staticPlot": True},
                     ),
                 ),
@@ -250,7 +250,7 @@ HTML_ROW_GRAPH_ONE = html.Div(
             dcc.Loading(
                 dcc.Graph(
                     id="graph-rainfall",
-                    figure=pyfigure.figure_empty(),
+                    figure=pyfigure.generate_empty_figure(),
                     config={"staticPlot": True},
                 )
             )
@@ -293,7 +293,7 @@ HTML_ROW_TABLE_ANALYZE = html.Div(
     dbc.Container(
         dcc.Loading(
             children=dcc.Graph(
-                figure=pyfigure.figure_empty(),
+                figure=pyfigure.generate_empty_figure(),
                 config={"staticPlot": True},
             ),
             id="tab-analysis",
@@ -349,7 +349,7 @@ HTML_ROW_GRAPH_ANALYSIS = html.Div(
     dbc.Container(
         dcc.Loading(
             children=dcc.Graph(
-                figure=pyfigure.figure_empty(),
+                figure=pyfigure.generate_empty_figure(),
                 config={"staticPlot": True},
             ),
             id="tab-graph-analysis",
@@ -367,7 +367,7 @@ HTML_ROW_GRAPH_CUMSUM = html.Div(
                 dbc.Col(
                     dcc.Loading(
                         children=dcc.Graph(
-                            figure=pyfigure.figure_empty(),
+                            figure=pyfigure.generate_empty_figure(),
                             config={"staticPlot": True},
                         ),
                         id="tab-graph-cumsum",
@@ -389,7 +389,7 @@ HTML_ROW_GRAPH_CONSISTENCY = html.Div(
                 dbc.Col(
                     dcc.Loading(
                         children=dcc.Graph(
-                            figure=pyfigure.figure_empty(),
+                            figure=pyfigure.generate_empty_figure(),
                             config={"staticPlot": True},
                         ),
                         id="tab-graph-consistency",

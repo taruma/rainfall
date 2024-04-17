@@ -151,13 +151,13 @@ def callback_visualize(_, table_data, table_columns, graphbar_opt):
     button_analyze_outline = False
 
     if dataframe.size > (366 * 8):
-        fig = pyfigure.figure_scatter(dataframe)
+        fig = pyfigure.generate_scatter_figure(dataframe)
     else:
         row_graphbar_options_style = {"visibility": "visible"}
         if graphbar_opt in ["group", "stack"]:
-            fig = pyfigure.figure_bar(dataframe, graphbar_opt)
+            fig = pyfigure.generate_bar_figure(dataframe, graphbar_opt)
         else:
-            fig = pyfigure.figure_scatter(dataframe)
+            fig = pyfigure.generate_scatter_figure(dataframe)
 
     return [
         fig,
@@ -346,7 +346,7 @@ def callback_graph_analysis(
         summary_all.append(dataframe)
 
     graphs_maxsum = [
-        pyfigure.figure_summary_maxsum(
+        pyfigure.generate_summary_maximum_sum(
             summary,
             title=f"<b>{period}: {title}</b>",
             period=period,
@@ -355,12 +355,12 @@ def callback_graph_analysis(
         for summary, title, period in zip(summary_all, label_maxsum * 3, label_periods)
     ]
     graphs_raindry = [
-        pyfigure.figure_summary_raindry(
+        pyfigure.generate_summary_rain_dry(
             summary, title=f"<b>{period}: {title}</b>", period=period
         )
         for summary, title, period in zip(summary_all, label_raindry * 3, label_periods)
     ]
-    graph_maxdate = [pyfigure.figure_summary_maxdate(summary_all)]
+    graph_maxdate = [pyfigure.generate_summary_maximum_date(summary_all)]
 
     all_graphs = graphs_maxsum + graphs_raindry + graph_maxdate
     labels = [": ".join(i) for i in product(label_ufunc, label_periods)]
@@ -375,7 +375,7 @@ def callback_graph_analysis(
     cumsum = pyfunc.transform_to_dataframe(cumsum_data, cumsum_columns)
 
     graph_cumsum = [
-        pyfigure.figure_cumsum_single(cumsum, col=station) for station in cumsum.columns
+        pyfigure.generate_cumulative_sum(cumsum, data_column=station) for station in cumsum.columns
     ]
 
     children_cumsum = pylayoutfunc.create_tabcard_graph_layout(
@@ -387,13 +387,13 @@ def callback_graph_analysis(
     if cumsum.columns.size == 1:
         children_consistency = (
             dcc.Graph(
-                figure=pyfigure.figure_empty(text="Not Available for Single Station"),
+                figure=pyfigure.generate_empty_figure(text="Not Available for Single Station"),
                 config={"staticPlot": True},
             ),
         )
     else:
         graph_consistency = [
-            pyfigure.figure_consistency(cumsum, col=station)
+            pyfigure.generate_scatter_with_trendline(cumsum, data_column=station)
             for station in cumsum.columns
         ]
 

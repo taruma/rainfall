@@ -12,7 +12,7 @@ hktemplate = pio.templates[pio.templates.default]
 _TEMPLATE = appConfig.TEMPLATE
 _FONT_FAMILY = hktemplate.layout.font.family
 _RED, _GREEN, _BLUE = colors.hex_to_rgb(hktemplate.layout.font.color)
-_FONT_COLOR_RGB_ALPHA = f"rgba({_RED},{_GREEN},{_BLUE},0.4)"
+FONT_COLOR_RGB_ALPHA = f"rgba({_RED},{_GREEN},{_BLUE},0.4)"
 
 ## LAYOUT
 # WATERMARK
@@ -102,7 +102,7 @@ hktemplate.layout.xaxis.showline = True
 hktemplate.layout.xaxis.linewidth = _XAXIS_LINEWIDTH
 hktemplate.layout.xaxis.linecolor = _XAXIS_GRIDCOLOR
 hktemplate.layout.xaxis.spikecolor = _XAXIS_GRIDCOLOR
-hktemplate.layout.xaxis.gridcolor = _FONT_COLOR_RGB_ALPHA
+hktemplate.layout.xaxis.gridcolor = FONT_COLOR_RGB_ALPHA
 hktemplate.layout.xaxis.gridwidth = _XAXIS_LINEWIDTH
 # hktemplate.layout.xaxis.title.text = "<b>PLACEHOLDER XAXIS</b>"
 hktemplate.layout.xaxis.title.font.size = _XAXIS_TITLE_FONT_SIZE
@@ -165,7 +165,7 @@ hktemplate.layout.yaxis.linewidth = _YAXIS_LINEWIDTH
 hktemplate.layout.yaxis.linecolor = _YAXIS_GRIDCOLOR
 hktemplate.layout.yaxis.spikecolor = _YAXIS_GRIDCOLOR
 hktemplate.layout.yaxis.rangemode = "tozero"
-hktemplate.layout.yaxis.gridcolor = _FONT_COLOR_RGB_ALPHA
+hktemplate.layout.yaxis.gridcolor = FONT_COLOR_RGB_ALPHA
 hktemplate.layout.yaxis.gridwidth = _YAXIS_LINEWIDTH
 # hktemplate.layout.yaxis.title.text = "<b>PLACEHOLDER XAXIS</b>"
 hktemplate.layout.yaxis.title.font.size = _YAXIS_TITLE_FONT_SIZE
